@@ -31,6 +31,9 @@ export class Reservation {
 
   @Prop()
   platform?: string; // 'airbnb', 'booking', etc.
+
+  @Prop({ default: 'reservation' })
+  type?: string; // 'reservation', 'manual_block_date'
 }
 
 export const ReservationSchema = SchemaFactory.createForClass(Reservation);

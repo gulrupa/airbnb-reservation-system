@@ -5,6 +5,7 @@ import { ReservationController } from './controllers/reservation.controller';
 import { CalendarUrlController } from './controllers/calendar-url.controller';
 import { ReservationService } from '../application/services/reservation.service';
 import { CalendarUrlService } from '../application/services/calendar-url.service';
+import { CalendarSyncService } from '../application/services/calendar-sync.service';
 import { ReservationRepository } from '../application/repositories/reservation.repository';
 import { CalendarUrlRepository } from '../application/repositories/calendar-url.repository';
 import { AirbnbCalendarService } from '../application/services/airbnb/airbnb-calendar.service';
@@ -37,6 +38,7 @@ import {
     ReservationRepository,
     CalendarUrlService,
     CalendarUrlRepository,
+    CalendarSyncService,
     // Injection des implémentations concrètes avec leurs interfaces génériques
     {
       provide: 'ICalendarFetcher',

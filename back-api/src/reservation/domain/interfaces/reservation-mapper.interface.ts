@@ -1,5 +1,5 @@
 import { Reservation } from '../entities/reservation.entity';
-import { CalendarEvent } from './calendar-event.interface';
+import { CalendarBookingEvent } from './calendar-booking-event.interface';
 
 /**
  * Interface générique pour mapper les événements de calendrier en réservations
@@ -9,16 +9,16 @@ import { CalendarEvent } from './calendar-event.interface';
 export interface IReservationMapper {
   /**
    * Convertit un événement de calendrier en réservation
-   * @param event L'événement de calendrier à mapper (générique)
+   * @param event L'événement de calendrier à mapper (booking event)
    * @returns Une réservation ou null si l'événement n'est pas une réservation
    */
-  mapToReservation(event: CalendarEvent): Reservation | null;
+  mapToReservation(event: CalendarBookingEvent): Reservation | null;
 
   /**
    * Convertit plusieurs événements en réservations
-   * @param events Les événements à mapper (génériques)
+   * @param events Les événements à mapper (booking events)
    * @returns Les réservations mappées
    */
-  mapToReservations(events: CalendarEvent[]): Reservation[];
+  mapToReservations(events: CalendarBookingEvent[]): Reservation[];
 }
 

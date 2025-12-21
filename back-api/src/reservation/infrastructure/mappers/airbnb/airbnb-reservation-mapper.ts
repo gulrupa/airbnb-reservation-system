@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Reservation } from '../../../domain/entities/reservation.entity';
 import { AirbnbCalendarEvent } from '../../calendar/parsers/airbnb/interfaces/airbnb-calendar-event.interface';
 import { IAirbnbReservationMapper } from './interfaces/airbnb-reservation-mapper.interface';
-import { CalendarEvent } from '../../../domain/interfaces/calendar-event.interface';
+import { CalendarBookingEvent } from '../../../domain/interfaces/calendar-booking-event.interface';
 import { randomUUID } from 'crypto';
 
 /**
@@ -15,7 +15,7 @@ export class AirbnbReservationMapper implements IAirbnbReservationMapper {
    * @param event L'événement de calendrier à mapper
    * @returns Une réservation ou null si l'événement n'est pas une réservation
    */
-  mapToReservation(event: CalendarEvent): Reservation | null {
+  mapToReservation(event: CalendarBookingEvent): Reservation | null {
     // Vérifier si c'est un événement Airbnb
     if (!this.isAirbnbEvent(event)) {
       return null;
@@ -30,8 +30,13 @@ export class AirbnbReservationMapper implements IAirbnbReservationMapper {
    * @returns Une réservation ou null si l'événement n'est pas une réservation
    */
   mapAirbnbEventToReservation(event: AirbnbCalendarEvent): Reservation | null {
-    // Ne mapper que les événements qui sont des réservations
-    if (event.summary !== 'Reserved' || !event.reservationUrl) {
+    // Mapper les réservations normales (Reserved avec URL)
+    const isNormalReservation = event.summary === 'Reserved' && event.reservationUrl;
+    
+    // Mapper les manual block dates (Airbnb (Not available))
+    const isManualBlockDate = event.isManualBlockDate === true;
+    
+    if (!isNormalReservation && !isManualBlockDate) {
       return null;
     }
 
@@ -50,6 +55,9 @@ export class AirbnbReservationMapper implements IAirbnbReservationMapper {
     // On met une valeur par défaut
     const numberOfTravelers = 1;
 
+    // Déterminer le type de réservation
+    const type = isManualBlockDate ? 'manual_block_date' : 'reservation';
+
     return new Reservation(
       internalId,
       externalId,
@@ -57,6 +65,7 @@ export class AirbnbReservationMapper implements IAirbnbReservationMapper {
       event.startDate,
       event.endDate,
       numberOfTravelers,
+      type,
     );
   }
 
@@ -65,7 +74,7 @@ export class AirbnbReservationMapper implements IAirbnbReservationMapper {
    * @param events Les événements à mapper
    * @returns Les réservations mappées (filtre les null)
    */
-  mapToReservations(events: CalendarEvent[]): Reservation[] {
+  mapToReservations(events: CalendarBookingEvent[]): Reservation[] {
     return events
       .map((event) => this.mapToReservation(event))
       .filter((reservation): reservation is Reservation => reservation !== null);
@@ -87,7 +96,7 @@ export class AirbnbReservationMapper implements IAirbnbReservationMapper {
    * @param event L'événement à vérifier
    * @returns true si c'est un événement Airbnb
    */
-  private isAirbnbEvent(event: CalendarEvent): boolean {
+  private isAirbnbEvent(event: CalendarBookingEvent): boolean {
     // Vérifier si l'événement a les propriétés spécifiques Airbnb
     return 'reservationUrl' in event || 'phoneNumber' in event;
   }

@@ -20,6 +20,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { CalendarUrlService } from '../../application/services/calendar-url.service';
+import { CalendarSyncService } from '../../application/services/calendar-sync.service';
 import { CreateCalendarUrlDto } from '../../application/dto/create-calendar-url.dto';
 import { UpdateCalendarUrlDto } from '../../application/dto/update-calendar-url.dto';
 
@@ -28,7 +29,10 @@ import { UpdateCalendarUrlDto } from '../../application/dto/update-calendar-url.
 export class CalendarUrlController {
   private readonly logger = new Logger(CalendarUrlController.name);
 
-  constructor(private readonly calendarUrlService: CalendarUrlService) {}
+  constructor(
+    private readonly calendarUrlService: CalendarUrlService,
+    private readonly calendarSyncService: CalendarSyncService,
+  ) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -133,6 +137,42 @@ export class CalendarUrlController {
   @ApiResponse({ status: 404, description: 'URL de calendrier non trouvée' })
   async deleteCalendarUrl(@Param('id') id: string) {
     return this.calendarUrlService.deleteCalendarUrl(id);
+  }
+
+  @Post('sync')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Synchroniser manuellement tous les calendriers actifs' })
+  @ApiResponse({
+    status: 200,
+    description: 'Synchronisation lancée avec succès',
+  })
+  async syncAllCalendars() {
+    this.logger.log('Synchronisation manuelle déclenchée');
+    await this.calendarSyncService.syncAllCalendars();
+    return { message: 'Synchronisation terminée' };
+  }
+
+  @Post('sync/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Synchroniser un calendrier spécifique' })
+  @ApiParam({ name: 'id', description: 'ID de l\'URL de calendrier' })
+  @ApiResponse({
+    status: 200,
+    description: 'Synchronisation du calendrier lancée avec succès',
+  })
+  @ApiResponse({ status: 404, description: 'URL de calendrier non trouvée' })
+  async syncCalendar(@Param('id') id: string) {
+    const calendarUrl = await this.calendarUrlService.getCalendarUrlById(id);
+    this.logger.log(`Synchronisation manuelle du calendrier ${id} déclenchée`);
+    const result = await this.calendarSyncService.syncCalendar(
+      calendarUrl.url,
+      calendarUrl.platform,
+    );
+    return {
+      message: 'Synchronisation terminée',
+      created: result.created,
+      updated: result.updated,
+    };
   }
 }
 

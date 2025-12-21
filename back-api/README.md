@@ -146,10 +146,32 @@ npm run format         # Formater le code avec Prettier
 
 ## 🔐 Variables d'environnement
 
-| Variable | Description | Exemple |
-|----------|-------------|---------|
-| `MONGODB_URI` | URI de connexion MongoDB | `mongodb://localhost:27017/airbnb-reservations` |
-| `PORT` | Port d'écoute de l'API | `3000` |
+| Variable | Description | Exemple | Défaut |
+|----------|-------------|---------|--------|
+| `MONGODB_URI` | URI de connexion MongoDB | `mongodb://localhost:27017/airbnb-reservations` | - |
+| `PORT` | Port d'écoute de l'API | `3000` | `3000` |
+| `CALENDAR_SYNC_CRON` | Expression cron pour la synchronisation automatique | `0 * * * *` (toutes les heures) | `0 * * * *` |
+| `LOG_LEVEL` | Niveaux de log activés (séparés par des virgules) | `error,warn,log,debug,verbose` | `error,warn,log,debug,verbose` |
+
+### Format de l'expression cron
+
+L'expression cron suit le format standard : `minute heure jour mois jour-semaine`
+
+Exemples :
+- `0 * * * *` : Toutes les heures à la minute 0
+- `*/30 * * * *` : Toutes les 30 minutes
+- `0 0 * * *` : Tous les jours à minuit
+- `0 0 * * 1` : Tous les lundis à minuit
+- `0 9,17 * * *` : À 9h et 17h tous les jours
+
+### Niveaux de log
+
+Les niveaux de log disponibles sont : `error`, `warn`, `log`, `debug`, `verbose`
+
+Exemples de configuration :
+- `error,warn,log` : Production (seulement les erreurs, avertissements et logs)
+- `error,warn,log,debug` : Développement (avec debug)
+- `error,warn,log,debug,verbose` : Développement détaillé (tous les niveaux)
 
 ## 📄 License
 

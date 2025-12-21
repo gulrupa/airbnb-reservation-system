@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { AirbnbCalendarEvent } from './interfaces/airbnb-calendar-event.interface';
 import { IAirbnbCalendarParser } from './interfaces/airbnb-calendar-parser.interface';
 
@@ -11,6 +11,8 @@ const ICAL = require('ical.js');
  */
 @Injectable()
 export class AirbnbCalendarParser implements IAirbnbCalendarParser {
+  private readonly logger = new Logger(AirbnbCalendarParser.name);
+
   parse(icalData: string): AirbnbCalendarEvent[] {
     try {
       const jcalData = ICAL.parse(icalData);
@@ -18,19 +20,30 @@ export class AirbnbCalendarParser implements IAirbnbCalendarParser {
       const vevents = comp.getAllSubcomponents('vevent');
 
       const events: AirbnbCalendarEvent[] = [];
+      let parseErrors = 0;
 
       vevents.forEach((vevent) => {
-        const event = this.parseVEvent(vevent);
-        if (event) {
-          events.push(event);
+        try {
+          const event = this.parseVEvent(vevent);
+          if (event) {
+            events.push(event);
+          }
+        } catch (error) {
+          parseErrors++;
         }
       });
+
+      if (parseErrors > 0) {
+        this.logger.warn(
+          `${parseErrors} événement(s) n'ont pas pu être parsés sur ${vevents.length} événement(s) total`,
+        );
+      }
 
       return events;
     } catch (error) {
       throw new HttpException(
         `Erreur lors du parsing du calendrier: ${error.message}`,
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
   }
@@ -39,10 +52,12 @@ export class AirbnbCalendarParser implements IAirbnbCalendarParser {
    * Parse un composant VEVENT iCal
    * @param vevent Le composant VEVENT
    * @returns L'événement parsé ou null
+   * @throws HttpException pour les erreurs critiques (comme l'extraction de l'ID externe)
    */
   private parseVEvent(vevent: any): AirbnbCalendarEvent | null {
+    const uid = vevent.getFirstPropertyValue('uid') || '';
+    
     try {
-      const uid = vevent.getFirstPropertyValue('uid') || '';
       const summary = vevent.getFirstPropertyValue('summary') || '';
       const description = vevent.getFirstPropertyValue('description') || '';
 
@@ -65,9 +80,18 @@ export class AirbnbCalendarParser implements IAirbnbCalendarParser {
       const reservationUrl = this.extractReservationUrl(description);
       const phoneNumber = this.extractPhoneNumber(description);
       
-      // Extraction de l'ID externe directement depuis l'URL de réservation
-      // Lance une erreur si l'ID ne peut pas être extrait
-      const externalId = this.extractExternalIdFromUrl(reservationUrl);
+      // Vérifier si c'est un "manual block date" (Airbnb (Not available) sans URL de réservation)
+      const isManualBlockDate = summary === 'Airbnb (Not available)' && !reservationUrl;
+      
+      let externalId: string;
+      if (isManualBlockDate) {
+        // Pour les manual block dates, créer un externalId basé sur l'UID et les dates
+        externalId = this.generateManualBlockDateId(uid, startDate, endDate);
+      } else {
+        // Extraction de l'ID externe directement depuis l'URL de réservation
+        // Lance une erreur si l'ID ne peut pas être extrait (erreur critique)
+        externalId = this.extractExternalIdFromUrl(reservationUrl);
+      }
 
       return {
         uid,
@@ -79,10 +103,13 @@ export class AirbnbCalendarParser implements IAirbnbCalendarParser {
         phoneNumber,
         externalId,
         dtstamp: stampDate,
+        isManualBlockDate,
       };
     } catch (error) {
-      console.error('Erreur lors du parsing d\'un événement:', error);
-      return null;
+      this.logger.error(
+        `Erreur lors du parsing de l'événement avec UID: ${uid || 'inconnu'}`
+      );
+      throw error;
     }
   }
 
@@ -158,8 +185,25 @@ export class AirbnbCalendarParser implements IAirbnbCalendarParser {
     // Lancer une erreur si l'ID ne peut pas être extrait
     throw new HttpException(
       'Impossible d\'extraire l\'ID externe depuis l\'URL de réservation',
-      HttpStatus.BAD_REQUEST,
+      HttpStatus.UNPROCESSABLE_ENTITY,
     );
+  }
+
+  /**
+   * Génère un ID externe pour les manual block dates
+   * @param uid L'UID de l'événement
+   * @param startDate La date de début
+   * @param endDate La date de fin
+   * @returns Un ID externe unique pour le manual block date
+   */
+  private generateManualBlockDateId(
+    uid: string,
+    startDate: Date,
+    endDate: Date,
+  ): string {
+    // Créer un ID basé sur l'UID
+    const uidPart = uid ? uid.split('@')[0] : 'unknown';
+    return `MANUAL_BLOCK_${uidPart}`;
   }
 }
 

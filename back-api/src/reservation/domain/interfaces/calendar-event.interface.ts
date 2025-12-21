@@ -1,6 +1,6 @@
 /**
  * Interface générique pour un événement de calendrier
- * Peut être utilisée pour n'importe quel type de calendrier (Airbnb, Booking, etc.)
+ * Interface de base pour tous les types d'événements de calendrier
  */
 export interface CalendarEvent {
   /** Identifiant unique de l'événement */

@@ -5,6 +5,7 @@ export class Reservation {
   startDate: Date;
   endDate: Date;
   numberOfTravelers: number;
+  type?: string;
 
   constructor(
     internalId: string,
@@ -13,6 +14,7 @@ export class Reservation {
     startDate: Date,
     endDate: Date,
     numberOfTravelers: number,
+    type?: string,
   ) {
     this.internalId = internalId;
     this.externalId = externalId;
@@ -20,6 +22,7 @@ export class Reservation {
     this.startDate = startDate;
     this.endDate = endDate;
     this.numberOfTravelers = numberOfTravelers;
+    this.type = type || 'reservation';
   }
 }
 

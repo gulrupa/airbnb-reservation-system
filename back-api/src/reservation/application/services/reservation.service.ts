@@ -25,6 +25,12 @@ export class ReservationService {
     return reservation;
   }
 
+  async getReservationByExternalId(
+    externalId: string,
+  ): Promise<ReservationDocument | null> {
+    return this.reservationRepository.findByExternalId(externalId);
+  }
+
   async createReservation(
     data: CreateReservationDto,
   ): Promise<ReservationDocument> {

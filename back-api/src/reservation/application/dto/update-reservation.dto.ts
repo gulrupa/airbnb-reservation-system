@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNumber, IsPositive, Min, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsPositive, Min, IsOptional, IsEnum } from 'class-validator';
 import { IsDateOrDateString } from '../../../common/decorators/is-date-or-date-string.decorator';
 import { TransformDate } from '../../../common/transformers/date.transformer';
 
@@ -57,5 +57,14 @@ export class UpdateReservationDto {
   @IsPositive()
   @Min(1)
   numberOfTravelers?: number;
+
+  @ApiPropertyOptional({
+    description: 'Type de réservation',
+    example: 'reservation',
+    enum: ['reservation', 'manual_block_date'],
+  })
+  @IsOptional()
+  @IsEnum(['reservation', 'manual_block_date'])
+  type?: string;
 }
 

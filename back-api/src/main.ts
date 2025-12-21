@@ -8,8 +8,26 @@ import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   
+  const logLevels = process.env.LOG_LEVEL
+    ? process.env.LOG_LEVEL.split(',').map((level) => level.trim())
+    : ['error', 'warn', 'log', 'debug', 'verbose'];
+  
+  const validLogLevels = ['error', 'warn', 'log', 'debug', 'verbose'];
+  const filteredLogLevels = logLevels.filter((level) =>
+    validLogLevels.includes(level),
+  );
+  
+  if (filteredLogLevels.length === 0) {
+    logger.warn(
+      'Aucun niveau de log valide trouvé, utilisation des niveaux par défaut',
+    );
+    filteredLogLevels.push(...['error', 'warn', 'log']);
+  }
+  
+  logger.log(`Niveaux de log configurés: ${filteredLogLevels.join(', ')}`);
+  
   const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+    logger: filteredLogLevels as any,
   });
 
   // Configuration du logging global
@@ -51,7 +69,11 @@ async function bootstrap() {
   
   logger.log(`Application is running on: http://localhost:${port}`);
   logger.log(`Swagger documentation: http://localhost:${port}/api`);
-  logger.debug('Debug logging enabled');
-  logger.verbose('Verbose logging enabled');
+  if (filteredLogLevels.includes('debug')) {
+    logger.debug('Debug logging enabled');
+  }
+  if (filteredLogLevels.includes('verbose')) {
+    logger.verbose('Verbose logging enabled');
+  }
 }
 bootstrap();

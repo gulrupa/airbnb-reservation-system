@@ -17,6 +17,8 @@ export interface Annonce {
   address?: string;
   /** Liste des calendriers associés (populés avec les données complètes) */
   calendarUrlIds?: (string | CalendarUrl)[];
+  /** Liste des annonces qui bloquent cette annonce (populés avec les données complètes) */
+  blockedByAnnonceIds?: (string | Annonce)[];
   /** Date de création */
   createdAt: string;
   /** Date de dernière modification */
@@ -35,6 +37,8 @@ export interface CreateAnnonceDto {
   address?: string;
   /** Liste des IDs des calendriers à associer */
   calendarUrlIds?: string[];
+  /** Liste des IDs des annonces qui bloquent cette annonce */
+  blockedByAnnonceIds?: string[];
 }
 
 /**
@@ -50,5 +54,7 @@ export interface UpdateAnnonceDto {
   address?: string;
   /** Nouvelle liste d'IDs de calendriers */
   calendarUrlIds?: string[];
+  /** Nouvelle liste d'IDs d'annonces qui bloquent cette annonce */
+  blockedByAnnonceIds?: string[];
 }
 

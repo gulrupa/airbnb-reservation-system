@@ -1,5 +1,6 @@
 import { api } from './api';
 import type { Annonce, CreateAnnonceDto, UpdateAnnonceDto } from '@/types/annonce';
+import type { Reservation } from '@/types/calendar';
 
 /**
  * Service API pour la gestion des annonces
@@ -49,6 +50,24 @@ export const annonceApi = {
    */
   delete: async (id: string): Promise<void> => {
     return api.delete<void>(`/annonces/${id}`);
+  },
+
+  /**
+   * Vérifie si une annonce est bloquée par d'autres annonces
+   * @param id - ID MongoDB de l'annonce
+   * @returns Statut de blocage de l'annonce
+   */
+  isBlocked: async (id: string): Promise<{ isBlocked: boolean }> => {
+    return api.get<{ isBlocked: boolean }>(`/annonces/${id}/is-blocked`);
+  },
+
+  /**
+   * Récupère toutes les indisponibilités (réservations) liées à une annonce
+   * @param id - ID MongoDB de l'annonce
+   * @returns Liste de toutes les réservations (indisponibilités) liées à l'annonce
+   */
+  getUnavailabilities: async (id: string): Promise<Reservation[]> => {
+    return api.get<Reservation[]>(`/annonces/${id}/unavailabilities`);
   },
 };
 

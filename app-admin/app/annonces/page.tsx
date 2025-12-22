@@ -14,7 +14,7 @@ import { Spinner } from '@heroui/spinner';
 import { annonceApi } from '@/lib/annonce-api';
 import { calendarApi } from '@/lib/calendar-api';
 import type { Annonce, CreateAnnonceDto, UpdateAnnonceDto } from '@/types/annonce';
-import type { CalendarUrl } from '@/types/calendar';
+import type { CalendarUrl, Reservation } from '@/types/calendar';
 
 /**
  * Page de gestion des annonces.
@@ -54,6 +54,17 @@ export default function AnnoncesPage() {
     calendarUrlIds: [],
   });
   const [selectedCalendarIds, setSelectedCalendarIds] = useState<Set<string>>(new Set());
+  const [selectedBlockedAnnonceIds, setSelectedBlockedAnnonceIds] = useState<Set<string>>(new Set());
+
+  // États pour la modal des indisponibilités
+  const {
+    isOpen: isUnavailabilitiesOpen,
+    onOpen: onUnavailabilitiesOpen,
+    onClose: onUnavailabilitiesClose,
+  } = useDisclosure();
+  const [selectedAnnonceForUnavailabilities, setSelectedAnnonceForUnavailabilities] = useState<Annonce | null>(null);
+  const [unavailabilities, setUnavailabilities] = useState<Reservation[]>([]);
+  const [loadingUnavailabilities, setLoadingUnavailabilities] = useState(false);
 
   // Redirection vers la page de login si non authentifié
   useEffect(() => {
@@ -99,6 +110,7 @@ export default function AnnoncesPage() {
       const data: CreateAnnonceDto = {
         ...formData,
         calendarUrlIds: Array.from(selectedCalendarIds),
+        blockedByAnnonceIds: Array.from(selectedBlockedAnnonceIds),
       };
       await annonceApi.create(data);
       await loadData(); // Recharge la liste après création
@@ -131,6 +143,15 @@ export default function AnnoncesPage() {
     });
     setSelectedCalendarIds(new Set(calendarIds));
 
+    // Extraire les IDs des annonces qui bloquent (peuvent être des objets ou des strings)
+    const blockedAnnonceIds = (annonce.blockedByAnnonceIds || []).map((ann) => {
+      if (typeof ann === 'string') {
+        return ann;
+      }
+      return (ann as Annonce)._id;
+    });
+    setSelectedBlockedAnnonceIds(new Set(blockedAnnonceIds));
+
     onEditOpen(); // Ouvre la modal d'édition
   };
 
@@ -146,6 +167,7 @@ export default function AnnoncesPage() {
       const data: UpdateAnnonceDto = {
         ...formData,
         calendarUrlIds: Array.from(selectedCalendarIds),
+        blockedByAnnonceIds: Array.from(selectedBlockedAnnonceIds),
       };
       await annonceApi.update(editingAnnonce._id, data);
       await loadData(); // Recharge la liste après mise à jour
@@ -189,6 +211,53 @@ export default function AnnoncesPage() {
       calendarUrlIds: [],
     });
     setSelectedCalendarIds(new Set());
+    setSelectedBlockedAnnonceIds(new Set());
+  };
+
+  /**
+   * Charge et affiche les indisponibilités d'une annonce.
+   * @param annonce - L'annonce pour laquelle afficher les indisponibilités
+   */
+  const handleViewUnavailabilities = async (annonce: Annonce) => {
+    setSelectedAnnonceForUnavailabilities(annonce);
+    setLoadingUnavailabilities(true);
+    setUnavailabilities([]);
+    onUnavailabilitiesOpen();
+
+    try {
+      const data = await annonceApi.getUnavailabilities(annonce._id);
+      setUnavailabilities(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des indisponibilités');
+    } finally {
+      setLoadingUnavailabilities(false);
+    }
+  };
+
+  /**
+   * Formate une date ISO en format français lisible
+   * @param dateString - Date au format ISO 8601
+   * @returns Date formatée en français (ex: "21 décembre 2025")
+   */
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  /**
+   * Récupère le titre d'une annonce à partir de son ID.
+   * @param annonceId - ID de l'annonce
+   * @returns Le titre de l'annonce ou "Annonce inconnue"
+   */
+  const getAnnonceTitle = (annonceId: string | Annonce): string => {
+    if (typeof annonceId === 'string') {
+      const annonce = annonces.find((ann) => ann._id === annonceId);
+      return annonce?.title || 'Annonce inconnue';
+    }
+    return annonceId.title || 'Annonce inconnue';
   };
 
   /**
@@ -248,6 +317,7 @@ export default function AnnoncesPage() {
                 <TableColumn>Description</TableColumn>
                 <TableColumn>Adresse</TableColumn>
                 <TableColumn>Calendriers</TableColumn>
+                <TableColumn>Bloquée par</TableColumn>
                 <TableColumn>Actions</TableColumn>
               </TableHeader>
               <TableBody emptyContent="Aucune annonce">
@@ -278,7 +348,28 @@ export default function AnnoncesPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-1">
+                        {(annonce.blockedByAnnonceIds || []).length > 0 ? (
+                          (annonce.blockedByAnnonceIds || []).map((annId, index) => (
+                            <Chip key={index} size="sm" variant="flat" color="warning">
+                              {getAnnonceTitle(annId)}
+                            </Chip>
+                          ))
+                        ) : (
+                          <span className="text-xs text-default-400">Aucune</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          color="primary"
+                          onPress={() => handleViewUnavailabilities(annonce)}
+                        >
+                          Indisponibilités
+                        </Button>
                         <Button
                           size="sm"
                           variant="flat"
@@ -350,10 +441,35 @@ export default function AnnoncesPage() {
                         </div>
                       </div>
 
+                      {/* Annonces bloquantes */}
+                      <div>
+                        <p className="text-xs text-default-500 mb-2">Bloquée par</p>
+                        <div className="flex flex-wrap gap-1">
+                          {(annonce.blockedByAnnonceIds || []).length > 0 ? (
+                            (annonce.blockedByAnnonceIds || []).map((annId, index) => (
+                              <Chip key={index} size="sm" variant="flat" color="warning">
+                                {getAnnonceTitle(annId)}
+                              </Chip>
+                            ))
+                          ) : (
+                            <span className="text-xs text-default-400">Aucune</span>
+                          )}
+                        </div>
+                      </div>
+
                       {/* Actions */}
                       <div className="pt-2 border-t border-default-200">
                         <p className="text-xs text-default-500 mb-2">Actions</p>
                         <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            size="sm"
+                            variant="flat"
+                            color="primary"
+                            onPress={() => handleViewUnavailabilities(annonce)}
+                            className="text-xs"
+                          >
+                            Indisponibilités
+                          </Button>
                           <Button
                             size="sm"
                             variant="flat"
@@ -369,7 +485,7 @@ export default function AnnoncesPage() {
                             color="danger"
                             onPress={() => handleDelete(annonce._id)}
                             isLoading={deleting === annonce._id}
-                            className="text-xs"
+                            className="text-xs col-span-2"
                           >
                             Supprimer
                           </Button>
@@ -429,6 +545,22 @@ export default function AnnoncesPage() {
                   {calendars.map((calendar) => (
                     <SelectItem key={calendar._id}>
                       {calendar.name || calendar.url}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Select
+                  label="Annonces qui bloquent cette annonce (optionnel)"
+                  placeholder="Sélectionnez les annonces"
+                  variant="bordered"
+                  selectionMode="multiple"
+                  selectedKeys={selectedBlockedAnnonceIds}
+                  onSelectionChange={(keys) => {
+                    setSelectedBlockedAnnonceIds(keys as Set<string>);
+                  }}
+                >
+                  {annonces.map((annonce) => (
+                    <SelectItem key={annonce._id}>
+                      {annonce.title}
                     </SelectItem>
                   ))}
                 </Select>
@@ -494,6 +626,24 @@ export default function AnnoncesPage() {
                     </SelectItem>
                   ))}
                 </Select>
+                <Select
+                  label="Annonces qui bloquent cette annonce (optionnel)"
+                  placeholder="Sélectionnez les annonces"
+                  variant="bordered"
+                  selectionMode="multiple"
+                  selectedKeys={selectedBlockedAnnonceIds}
+                  onSelectionChange={(keys) => {
+                    setSelectedBlockedAnnonceIds(keys as Set<string>);
+                  }}
+                >
+                  {annonces
+                    .filter((ann) => ann._id !== editingAnnonce?._id)
+                    .map((annonce) => (
+                      <SelectItem key={annonce._id}>
+                        {annonce.title}
+                      </SelectItem>
+                    ))}
+                </Select>
               </ModalBody>
               <ModalFooter>
                 <Button variant="flat" onPress={onClose}>
@@ -501,6 +651,80 @@ export default function AnnoncesPage() {
                 </Button>
                 <Button color="primary" onPress={handleUpdate}>
                   Mettre à jour
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* Modal des indisponibilités */}
+      <Modal isOpen={isUnavailabilitiesOpen} onClose={onUnavailabilitiesClose} size="3xl" scrollBehavior="inside">
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Indisponibilités - {selectedAnnonceForUnavailabilities?.title || ''}
+              </ModalHeader>
+              <ModalBody>
+                {loadingUnavailabilities ? (
+                  <div className="flex justify-center py-8">
+                    <Spinner size="lg" />
+                  </div>
+                ) : unavailabilities.length === 0 ? (
+                  <p className="text-center text-default-500 py-8">
+                    Aucune indisponibilité trouvée
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-sm text-default-600">
+                      {unavailabilities.length} réservation(s) trouvée(s)
+                    </p>
+                    <Table aria-label="Table des indisponibilités">
+                      <TableHeader>
+                        <TableColumn>ID Externe</TableColumn>
+                        <TableColumn>Date de début</TableColumn>
+                        <TableColumn>Date de fin</TableColumn>
+                        <TableColumn>Prix</TableColumn>
+                        <TableColumn>Voyageurs</TableColumn>
+                        <TableColumn>Type</TableColumn>
+                      </TableHeader>
+                      <TableBody>
+                        {unavailabilities.map((reservation) => (
+                          <TableRow key={reservation._id}>
+                            <TableCell>
+                              <p className="font-mono text-sm">{reservation.externalId}</p>
+                            </TableCell>
+                            <TableCell>{formatDate(reservation.startDate)}</TableCell>
+                            <TableCell>{formatDate(reservation.endDate)}</TableCell>
+                            <TableCell>
+                              {new Intl.NumberFormat('fr-FR', {
+                                style: 'currency',
+                                currency: 'EUR',
+                              }).format(reservation.price)}
+                            </TableCell>
+                            <TableCell>{reservation.numberOfTravelers}</TableCell>
+                            <TableCell>
+                              <Chip
+                                size="sm"
+                                color={reservation.type === 'manual_block_date' ? 'warning' : 'primary'}
+                                variant="flat"
+                              >
+                                {reservation.type === 'manual_block_date'
+                                  ? 'Blocage manuel'
+                                  : 'Réservation'}
+                              </Chip>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="flat" onPress={onClose}>
+                  Fermer
                 </Button>
               </ModalFooter>
             </>

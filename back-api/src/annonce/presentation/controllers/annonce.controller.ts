@@ -101,5 +101,42 @@ export class AnnonceController {
     await this.annonceService.deleteAnnonce(id);
     return { message: 'Annonce supprimée avec succès' };
   }
+
+  @Get(':id/is-blocked')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Vérifier si une annonce est bloquée par d\'autres annonces' })
+  @ApiParam({ name: 'id', description: 'ID de l\'annonce' })
+  @ApiResponse({
+    status: 200,
+    description: 'Statut de blocage de l\'annonce',
+    schema: {
+      type: 'object',
+      properties: {
+        isBlocked: { type: 'boolean', example: true },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Annonce non trouvée' })
+  async isBlockedByAnnonces(@Param('id') id: string) {
+    const isBlocked = await this.annonceService.isBlockedByAnnonces(id);
+    return { isBlocked };
+  }
+
+  @Get(':id/unavailabilities')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Récupérer toutes les indisponibilités (réservations) liées à une annonce',
+    description:
+      'Retourne toutes les réservations des calendriers de l\'annonce ainsi que les réservations des calendriers des annonces qui bloquent cette annonce',
+  })
+  @ApiParam({ name: 'id', description: 'ID de l\'annonce' })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste de toutes les réservations (indisponibilités) liées à l\'annonce',
+  })
+  @ApiResponse({ status: 404, description: 'Annonce non trouvée' })
+  async getUnavailabilities(@Param('id') id: string) {
+    return this.annonceService.getUnavailabilities(id);
+  }
 }
 

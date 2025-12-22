@@ -19,6 +19,9 @@ export class Annonce {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'CalendarUrl' }], default: [] })
   calendarUrlIds: Types.ObjectId[];
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Annonce' }], default: [] })
+  blockedByAnnonceIds: Types.ObjectId[];
 }
 
 export const AnnonceSchema = SchemaFactory.createForClass(Annonce);

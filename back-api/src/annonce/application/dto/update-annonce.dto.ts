@@ -38,5 +38,15 @@ export class UpdateAnnonceDto {
   @IsArray()
   @IsMongoId({ each: true })
   calendarUrlIds?: string[];
+
+  @ApiPropertyOptional({
+    description: 'Liste des IDs des annonces qui bloquent cette annonce',
+    example: ['507f1f77bcf86cd799439013', '507f1f77bcf86cd799439014'],
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  blockedByAnnonceIds?: string[];
 }
 

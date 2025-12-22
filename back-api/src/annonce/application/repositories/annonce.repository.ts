@@ -17,15 +17,27 @@ export class AnnonceRepository {
   ) {}
 
   async findAll(): Promise<AnnonceDocument[]> {
-    return this.annonceModel.find().populate('calendarUrlIds').exec();
+    return this.annonceModel
+      .find()
+      .populate('calendarUrlIds')
+      .populate('blockedByAnnonceIds')
+      .exec();
   }
 
   async findById(id: string): Promise<AnnonceDocument | null> {
-    return this.annonceModel.findById(id).populate('calendarUrlIds').exec();
+    return this.annonceModel
+      .findById(id)
+      .populate('calendarUrlIds')
+      .populate('blockedByAnnonceIds')
+      .exec();
   }
 
   async findByInternalId(internalId: string): Promise<AnnonceDocument | null> {
-    return this.annonceModel.findOne({ internalId }).populate('calendarUrlIds').exec();
+    return this.annonceModel
+      .findOne({ internalId })
+      .populate('calendarUrlIds')
+      .populate('blockedByAnnonceIds')
+      .exec();
   }
 
   async create(data: CreateAnnonceDto): Promise<AnnonceDocument> {
@@ -34,6 +46,7 @@ export class AnnonceRepository {
       ...data,
       internalId,
       calendarUrlIds: data.calendarUrlIds || [],
+      blockedByAnnonceIds: data.blockedByAnnonceIds || [],
     });
     return createdAnnonce.save();
   }
@@ -45,6 +58,7 @@ export class AnnonceRepository {
     return this.annonceModel
       .findByIdAndUpdate(id, data, { new: true })
       .populate('calendarUrlIds')
+      .populate('blockedByAnnonceIds')
       .exec();
   }
 

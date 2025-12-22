@@ -36,6 +36,11 @@ export const Navbar = () => {
               Calendriers
             </Button>
           </NextLink>
+          <NextLink href="/annonces">
+            <Button variant="flat" size="sm">
+              Annonces
+            </Button>
+          </NextLink>
           <ThemeSwitch />
         </NavbarItem>
         <NavbarItem>

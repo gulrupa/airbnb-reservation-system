@@ -58,7 +58,11 @@ export class CalendarSyncService implements OnModuleInit {
 
       for (const calendarUrl of activeCalendarUrls) {
         try {
-          const result = await this.syncCalendar(calendarUrl.url, calendarUrl.platform);
+          const result = await this.syncCalendar(
+            calendarUrl._id.toString(),
+            calendarUrl.url,
+            calendarUrl.platform,
+          );
           totalCreated += result.created;
           totalUpdated += result.updated;
           totalErrors += result.errors;
@@ -87,10 +91,11 @@ export class CalendarSyncService implements OnModuleInit {
   }
 
   async syncCalendar(
+    calendarUrlId: string,
     url: string,
     platform: string,
   ): Promise<{ created: number; updated: number; errors: number }> {
-    this.logger.debug(`Synchronisation du calendrier: ${url}`);
+    this.logger.debug(`Synchronisation du calendrier: ${url} (ID: ${calendarUrlId})`);
 
     if (platform !== 'airbnb') {
       this.logger.warn(`Plateforme ${platform} non supportée pour le moment`);
@@ -117,10 +122,11 @@ export class CalendarSyncService implements OnModuleInit {
             await this.updateReservationIfNeeded(
               existingReservation,
               reservation,
+              calendarUrlId,
             );
             updated++;
           } else {
-            await this.createReservationFromEntity(reservation);
+            await this.createReservationFromEntity(reservation, calendarUrlId);
             created++;
           }
         } catch (error) {
@@ -149,6 +155,7 @@ export class CalendarSyncService implements OnModuleInit {
 
   private async createReservationFromEntity(
     reservation: Reservation,
+    calendarUrlId: string,
   ): Promise<void> {
     const createDto: CreateReservationDto = {
       externalId: reservation.externalId,
@@ -157,6 +164,7 @@ export class CalendarSyncService implements OnModuleInit {
       endDate: reservation.endDate,
       numberOfTravelers: reservation.numberOfTravelers,
       type: reservation.type || 'reservation',
+      calendarUrlId,
     };
 
     await this.reservationService.createReservation(createDto);
@@ -165,13 +173,16 @@ export class CalendarSyncService implements OnModuleInit {
   private async updateReservationIfNeeded(
     existingReservation: ReservationDocument,
     newReservation: Reservation,
+    calendarUrlId: string,
   ): Promise<void> {
     const needsUpdate =
       existingReservation.startDate.getTime() !==
         newReservation.startDate.getTime() ||
       existingReservation.endDate.getTime() !== newReservation.endDate.getTime() ||
       existingReservation.price !== newReservation.price ||
-      existingReservation.numberOfTravelers !== newReservation.numberOfTravelers;
+      existingReservation.numberOfTravelers !== newReservation.numberOfTravelers ||
+      existingReservation.type !== newReservation.type ||
+      existingReservation.calendarUrlId?.toString() !== calendarUrlId;
 
     if (needsUpdate) {
       const updateDto: UpdateReservationDto = {
@@ -179,6 +190,8 @@ export class CalendarSyncService implements OnModuleInit {
         endDate: newReservation.endDate,
         price: newReservation.price,
         numberOfTravelers: newReservation.numberOfTravelers,
+        type: newReservation.type,
+        calendarUrlId,
       };
 
       await this.reservationService.updateReservation(

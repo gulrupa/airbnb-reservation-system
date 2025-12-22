@@ -67,7 +67,11 @@ import {
       inject: ['ICalendarFetcher', 'IAirbnbCalendarParser', 'IAirbnbReservationMapper'],
     },
   ],
-  exports: [ReservationService, AirbnbCalendarService],
+  exports: [
+    ReservationService,
+    AirbnbCalendarService,
+    CalendarUrlRepository,
+  ],
 })
 export class ReservationModule {}
 

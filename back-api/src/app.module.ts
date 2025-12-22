@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ReservationModule } from './reservation/presentation/reservation.module';
+import { AnnonceModule } from './annonce/presentation/annonce.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ReservationModule } from './reservation/presentation/reservation.module
       inject: [ConfigService],
     }),
     ReservationModule,
+    AnnonceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

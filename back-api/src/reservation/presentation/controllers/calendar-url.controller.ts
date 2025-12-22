@@ -127,16 +127,23 @@ export class CalendarUrlController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Supprimer une URL de calendrier' })
   @ApiParam({ name: 'id', description: 'ID de l\'URL de calendrier' })
   @ApiResponse({
-    status: 204,
+    status: 200,
     description: 'URL de calendrier supprimée avec succès',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'URL de calendrier supprimée avec succès' },
+      },
+    },
   })
   @ApiResponse({ status: 404, description: 'URL de calendrier non trouvée' })
   async deleteCalendarUrl(@Param('id') id: string) {
-    return this.calendarUrlService.deleteCalendarUrl(id);
+    await this.calendarUrlService.deleteCalendarUrl(id);
+    return { message: 'URL de calendrier supprimée avec succès' };
   }
 
   @Post('sync')
@@ -152,7 +159,7 @@ export class CalendarUrlController {
     return { message: 'Synchronisation terminée' };
   }
 
-  @Post('sync/:id')
+  @Post(':id/sync')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Synchroniser un calendrier spécifique' })
   @ApiParam({ name: 'id', description: 'ID de l\'URL de calendrier' })
@@ -165,6 +172,7 @@ export class CalendarUrlController {
     const calendarUrl = await this.calendarUrlService.getCalendarUrlById(id);
     this.logger.log(`Synchronisation manuelle du calendrier ${id} déclenchée`);
     const result = await this.calendarSyncService.syncCalendar(
+      id,
       calendarUrl.url,
       calendarUrl.platform,
     );

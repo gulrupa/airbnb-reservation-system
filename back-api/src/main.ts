@@ -29,7 +29,17 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: filteredLogLevels as any,
   });
+  // Configuration CORS pour permettre les requêtes depuis app-admin
+  const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3001';
+  app.enableCors({
+    origin: corsOrigin.split(',').map((origin) => origin.trim()),
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
+  logger.log(`CORS activé pour: ${corsOrigin}`);
 
+  // Configuration du logging global
   // Configuration du logging global
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalFilters(new AllExceptionsFilter());

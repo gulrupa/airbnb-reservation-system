@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type ReservationDocument = Reservation & Document;
 
@@ -34,6 +34,9 @@ export class Reservation {
 
   @Prop({ default: 'reservation' })
   type?: string; // 'reservation', 'manual_block_date'
+
+  @Prop({ type: Types.ObjectId, ref: 'CalendarUrl', index: true })
+  calendarUrlId?: Types.ObjectId;
 }
 
 export const ReservationSchema = SchemaFactory.createForClass(Reservation);

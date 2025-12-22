@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsPositive, Min, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsNumber, IsPositive, Min, IsOptional, IsEnum, IsMongoId } from 'class-validator';
 import { IsDateOrDateString } from '../../../common/decorators/is-date-or-date-string.decorator';
 import { TransformDate } from '../../../common/transformers/date.transformer';
 
@@ -63,5 +63,15 @@ export class CreateReservationDto {
   @IsOptional()
   @IsEnum(['reservation', 'manual_block_date'])
   type?: string;
+
+  @ApiProperty({
+    description: 'ID du calendrier associé (MongoDB ObjectId)',
+    example: '507f1f77bcf86cd799439011',
+    type: String,
+    required: false,
+  })
+  @IsOptional()
+  @IsMongoId()
+  calendarUrlId?: string;
 }
 

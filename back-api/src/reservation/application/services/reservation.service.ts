@@ -131,6 +131,12 @@ export class ReservationService {
     return this.reservationRepository.findByDateRange(startDate, endDate);
   }
 
+  async getReservationsByCalendarUrlId(
+    calendarUrlId: string,
+  ): Promise<ReservationDocument[]> {
+    return this.reservationRepository.findByCalendarUrlId(calendarUrlId);
+  }
+
   /**
    * Valide que les dates sont cohérentes
    * @param startDate Date de début

@@ -5,6 +5,7 @@ API NestJS pour la gestion des réservations et des calendriers Airbnb.
 ## 🚀 Fonctionnalités
 
 - **Gestion des réservations** : CRUD complet pour les réservations
+- **Gestion des annonces** : CRUD complet pour les annonces avec association de calendriers
 - **Gestion des URLs de calendrier** : Stockage et gestion des URLs de calendrier iCal
 - **Intégration Airbnb** : Récupération et parsing automatique des calendriers Airbnb
 - **Validation des données** : Validation automatique avec support des dates au format `YYYY-MM-DD` ou ISO 8601
@@ -55,6 +56,57 @@ http://localhost:3000/api
 
 Voir [README.API.md](./README.API.md) pour plus de détails.
 
+## 📋 Modules disponibles
+
+### Réservations (`/reservations`)
+
+Gestion complète des réservations avec support des dates et types (réservation, blocage manuel).
+
+**Endpoints principaux :**
+- `GET /reservations` : Liste toutes les réservations
+- `GET /reservations/:id` : Récupère une réservation par ID
+- `POST /reservations` : Crée une nouvelle réservation
+- `PUT /reservations/:id` : Met à jour une réservation
+- `DELETE /reservations/:id` : Supprime une réservation
+- `GET /reservations/user/:userId` : Récupère les réservations d'un utilisateur
+- `GET /reservations/property/:propertyId` : Récupère les réservations d'une propriété
+- `GET /reservations/date-range/start/:startDate/end/:endDate` : Récupère les réservations dans une plage de dates
+
+### Annonces (`/annonces`)
+
+Gestion des annonces avec association de calendriers par ID.
+
+**Endpoints principaux :**
+- `GET /annonces` : Liste toutes les annonces (avec calendriers associés)
+- `GET /annonces/:id` : Récupère une annonce par ID (avec calendriers associés)
+- `POST /annonces` : Crée une nouvelle annonce
+- `PUT /annonces/:id` : Met à jour une annonce
+- `DELETE /annonces/:id` : Supprime une annonce
+
+**Exemple de création d'annonce :**
+```json
+POST /annonces
+{
+  "title": "Appartement cosy au centre-ville",
+  "description": "Magnifique appartement de 50m² avec vue sur la ville",
+  "address": "123 Rue de la Paix, 75001 Paris",
+  "calendarUrlIds": ["507f1f77bcf86cd799439011", "507f1f77bcf86cd799439012"]
+}
+```
+
+**Note :** Les `calendarUrlIds` doivent être des IDs MongoDB valides de calendriers existants. La validation est effectuée automatiquement lors de la création ou de la mise à jour.
+
+### URLs de calendrier (`/calendar-urls`)
+
+Gestion des URLs de calendrier iCal pour la synchronisation automatique.
+
+**Endpoints principaux :**
+- `GET /calendar-urls` : Liste toutes les URLs de calendrier
+- `GET /calendar-urls/:id` : Récupère une URL de calendrier par ID
+- `POST /calendar-urls` : Crée une nouvelle URL de calendrier
+- `PUT /calendar-urls/:id` : Met à jour une URL de calendrier
+- `DELETE /calendar-urls/:id` : Supprime une URL de calendrier
+
 ## 🏗️ Architecture
 
 Le projet suit une architecture en couches :
@@ -67,6 +119,11 @@ src/
 │   ├── interceptors/    # Intercepteurs HTTP
 │   └── transformers/    # Transformateurs de données
 ├── reservation/
+│   ├── domain/          # Entités et interfaces métier
+│   ├── application/     # Services et DTOs
+│   ├── infrastructure/  # Implémentations techniques
+│   └── presentation/    # Contrôleurs et modules
+├── annonce/
 │   ├── domain/          # Entités et interfaces métier
 │   ├── application/     # Services et DTOs
 │   ├── infrastructure/  # Implémentations techniques

@@ -78,5 +78,9 @@ export class ReservationRepository {
       })
       .exec();
   }
+
+  async findByCalendarUrlId(calendarUrlId: string): Promise<ReservationDocument[]> {
+    return this.reservationModel.find({ calendarUrlId }).exec();
+  }
 }
 

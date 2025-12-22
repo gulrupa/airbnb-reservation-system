@@ -91,16 +91,23 @@ export class ReservationController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Supprimer une réservation' })
   @ApiParam({ name: 'id', description: 'ID de la réservation' })
   @ApiResponse({
-    status: 204,
+    status: 200,
     description: 'Réservation supprimée avec succès',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Réservation supprimée avec succès' },
+      },
+    },
   })
   @ApiResponse({ status: 404, description: 'Réservation non trouvée' })
   async deleteReservation(@Param('id') id: string) {
     await this.reservationService.deleteReservation(id);
+    return { message: 'Réservation supprimée avec succès' };
   }
 
   @Get('user/:userId')
@@ -161,6 +168,18 @@ export class ReservationController {
       throw new BadRequestException('L\'URL du calendrier est requise');
     }
     return this.airbnbCalendarService.fetchReservations(url);
+  }
+
+  @Get('calendar/:calendarUrlId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Récupérer les réservations d\'un calendrier' })
+  @ApiParam({ name: 'calendarUrlId', description: 'ID du calendrier' })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des réservations du calendrier',
+  })
+  async getReservationsByCalendarUrlId(@Param('calendarUrlId') calendarUrlId: string) {
+    return this.reservationService.getReservationsByCalendarUrlId(calendarUrlId);
   }
 }
 

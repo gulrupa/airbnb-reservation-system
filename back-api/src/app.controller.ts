@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { Public } from 'nest-keycloak-connect';
 import { AppService } from './app.service';
 
 @Controller()
@@ -10,6 +11,7 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Public()
   @Get('health')
   getHealth(): { status: string; timestamp: string } {
     return {

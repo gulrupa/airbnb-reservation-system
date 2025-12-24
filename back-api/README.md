@@ -8,6 +8,7 @@ API NestJS pour la gestion des réservations et des calendriers Airbnb.
 - **Gestion des annonces** : CRUD complet pour les annonces avec association de calendriers
 - **Gestion des URLs de calendrier** : Stockage et gestion des URLs de calendrier iCal
 - **Intégration Airbnb** : Récupération et parsing automatique des calendriers Airbnb
+- **Authentification Keycloak** : Protection de toutes les routes avec Keycloak via `nest-keycloak-connect`
 - **Validation des données** : Validation automatique avec support des dates au format `YYYY-MM-DD` ou ISO 8601
 - **Logging avancé** : Logging complet de toutes les requêtes et erreurs
 - **Documentation API** : Documentation Swagger/OpenAPI interactive
@@ -28,9 +29,13 @@ npm install
 # Créer le fichier .env
 cp .env.example .env
 
-# Configurer MongoDB dans .env
+# Configurer MongoDB et Keycloak dans .env
 MONGODB_URI=mongodb://localhost:27017/airbnb-reservations
 PORT=3000
+KEYCLOAK_URL=https://gul-si.fr/
+KEYCLOAK_REALM=gsi-booking
+KEYCLOAK_CLIENT_ID=app-admin
+CORS_ORIGIN=http://localhost:3001
 ```
 
 ## 🏃 Démarrage
@@ -260,6 +265,11 @@ npm run format         # Formater le code avec Prettier
 | `PORT` | Port d'écoute de l'API | `3000` | `3000` |
 | `CALENDAR_SYNC_CRON` | Expression cron pour la synchronisation automatique | `0 * * * *` (toutes les heures) | `0 * * * *` |
 | `LOG_LEVEL` | Niveaux de log activés (séparés par des virgules) | `error,warn,log,debug,verbose` | `error,warn,log,debug,verbose` |
+| `KEYCLOAK_URL` | URL de base de Keycloak | `https://gul-si.fr/` | `https://gul-si.fr/` |
+| `KEYCLOAK_REALM` | Nom du realm Keycloak | `gsi-booking` | `gsi-booking` |
+| `KEYCLOAK_CLIENT_ID` | ID du client Keycloak | `app-admin` | `app-admin` |
+| `KEYCLOAK_SECRET` | Secret du client Keycloak (optionnel pour les clients publics) | - | - |
+| `CORS_ORIGIN` | Origines autorisées pour CORS (séparées par des virgules) | `http://localhost:3001` | `http://localhost:3001` |
 
 ### Format de l'expression cron
 

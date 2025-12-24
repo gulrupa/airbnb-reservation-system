@@ -66,6 +66,15 @@ async function bootstrap() {
     .addTag('reservations', 'Gestion des réservations')
     .addTag('calendar-urls', 'Gestion des URLs de calendrier')
     .addTag('airbnb', 'Intégration avec les calendriers Airbnb')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Entrez votre token JWT Keycloak',
+      },
+      'keycloak',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

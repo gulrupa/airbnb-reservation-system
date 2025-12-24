@@ -46,6 +46,14 @@ Thumbs.db
 dist/
 *.js.map
 
+# Next.js
+.next/
+out/
+.vercel
+.swc/
+.next/cache/
+.vercel/
+
 # MongoDB
 *.mongodb
 

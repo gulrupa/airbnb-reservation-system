@@ -1,8 +1,8 @@
 import Keycloak from 'keycloak-js';
 
 const keycloakConfig = {
-  url: process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'http://localhost:8080',
-  realm: process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'airbnb-reservation',
+  url: process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'https://gul-si.fr/',
+  realm: process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'gsi-booking',
   clientId: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || 'app-admin',
 };
 

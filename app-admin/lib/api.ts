@@ -4,7 +4,7 @@ import { getKeycloak } from './keycloak';
  * URL de base de l'API backend
  * Récupérée depuis les variables d'environnement ou valeur par défaut
  */
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.booking.gul-si.fr';
 
 /**
  * Récupère les en-têtes HTTP avec l'authentification Keycloak

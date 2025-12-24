@@ -1,0 +1,61 @@
+name: Docker image generation - App Admin
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "app-admin/**"
+      - ".github/workflows/docker-app-admin.yml"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: gulrupa/ars-app-admin
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lire la version depuis package.json
+        id: extract-version
+        working-directory: app-admin
+        run: |
+          commit_message="${{ github.event.head_commit.message }}"
+          if [[ "$commit_message" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            if [ -f package.json ]; then
+              version=$(jq -r .version package.json)
+              echo "La version extraite depuis package.json est : $version"
+            else
+              echo "Erreur : package.json introuvable."
+              exit 1
+            fi
+          else
+            version="${{ github.sha }}"
+            echo "Le tag de l'image sera basé sur le SHA : $version"
+          fi
+          echo "PACKAGE_VERSION=$version" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app-admin
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.PACKAGE_VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+

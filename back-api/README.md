@@ -46,6 +46,57 @@ npm run start:prod
 npm run build
 ```
 
+## 🐳 Docker
+
+### Construire l'image
+
+```bash
+# Depuis le répertoire back-api
+docker build -t ars-back-api:latest .
+```
+
+### Lancer le conteneur
+
+```bash
+# Lancer le conteneur avec les variables d'environnement
+docker run -d \
+  --name ars-back-api \
+  -p 3000:3000 \
+  -e MONGODB_URI=mongodb://host.docker.internal:27017/airbnb-reservations \
+  -e PORT=3000 \
+  ars-back-api:latest
+```
+
+### Lancer avec un fichier .env
+
+```bash
+# Lancer le conteneur en utilisant un fichier .env
+docker run -d \
+  --name ars-back-api \
+  -p 3000:3000 \
+  --env-file .env \
+  ars-back-api:latest
+```
+
+### Commandes utiles
+
+```bash
+# Voir les logs
+docker logs ars-back-api
+
+# Suivre les logs en temps réel
+docker logs -f ars-back-api
+
+# Arrêter le conteneur
+docker stop ars-back-api
+
+# Redémarrer le conteneur
+docker restart ars-back-api
+
+# Supprimer le conteneur
+docker rm ars-back-api
+```
+
 ## 📚 Documentation API
 
 Une fois l'application démarrée, la documentation Swagger est accessible à :

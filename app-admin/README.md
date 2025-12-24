@@ -82,6 +82,60 @@ npm start
 
 **Note :** En production, le port peut être configuré via la variable `PORT` dans `.env` ou avec `PORT=3002 npm start` ou `npm start -- -p 3002`
 
+## 🐳 Docker
+
+### Construire l'image
+
+```bash
+# Depuis le répertoire app-admin
+docker build -t ars-app-admin:latest .
+```
+
+### Lancer le conteneur
+
+```bash
+# Lancer le conteneur avec les variables d'environnement
+docker run -d \
+  --name ars-app-admin \
+  -p 4200:4200 \
+  -e NEXT_PUBLIC_KEYCLOAK_URL=http://localhost:8080 \
+  -e NEXT_PUBLIC_KEYCLOAK_REALM=airbnb-reservation \
+  -e NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=app-admin \
+  -e NEXT_PUBLIC_API_URL=http://localhost:3000 \
+  -e PORT=4200 \
+  ars-app-admin:latest
+```
+
+### Lancer avec un fichier .env
+
+```bash
+# Lancer le conteneur en utilisant un fichier .env
+docker run -d \
+  --name ars-app-admin \
+  -p 4200:4200 \
+  --env-file .env \
+  ars-app-admin:latest
+```
+
+### Commandes utiles
+
+```bash
+# Voir les logs
+docker logs ars-app-admin
+
+# Suivre les logs en temps réel
+docker logs -f ars-app-admin
+
+# Arrêter le conteneur
+docker stop ars-app-admin
+
+# Redémarrer le conteneur
+docker restart ars-app-admin
+
+# Supprimer le conteneur
+docker rm ars-app-admin
+```
+
 ## 🔐 Configuration Keycloak
 
 ### Créer le client dans Keycloak

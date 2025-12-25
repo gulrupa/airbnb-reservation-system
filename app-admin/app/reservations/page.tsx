@@ -263,14 +263,16 @@ export default function ReservationsPage() {
                   setSelectedAnnonceId(value || 'all');
                 }}
               >
-                <SelectItem key="all" value="all">
-                  Toutes les annonces
-                </SelectItem>
-                {annonces.map((annonce) => (
-                  <SelectItem key={annonce._id} value={annonce._id}>
-                    {annonce.title}
-                  </SelectItem>
-                ))}
+                {[
+                  <SelectItem key="all">
+                    Toutes les annonces
+                  </SelectItem>,
+                  ...annonces.map((annonce) => (
+                    <SelectItem key={annonce._id}>
+                      {annonce.title}
+                    </SelectItem>
+                  )),
+                ]}
               </Select>
 
               {/* Checkbox pour cacher les blocages manuels */}

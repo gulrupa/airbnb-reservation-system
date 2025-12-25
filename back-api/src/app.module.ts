@@ -17,6 +17,7 @@ import { JobsController } from './jobs.controller';
 import { ReservationModule } from './reservation/presentation/reservation.module';
 import { AnnonceModule } from './annonce/presentation/annonce.module';
 import { EvenementModule } from './evenement/presentation/evenement.module';
+import { StatistiquesModule } from './statistiques/presentation/statistiques.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { EvenementModule } from './evenement/presentation/evenement.module';
     ReservationModule,
     AnnonceModule,
     EvenementModule,
+    StatistiquesModule,
   ],
   controllers: [AppController, JobsController],
   providers: [

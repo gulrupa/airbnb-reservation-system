@@ -71,7 +71,9 @@ export class AirbnbCalendarParser implements IAirbnbCalendarParser {
       }
 
       const startDate = this.parseICalDate(dtstart);
+      startDate.setHours(14, 0, 0, 0);
       const endDate = this.parseICalDate(dtend);
+      endDate.setHours(11, 0, 0, 0);
       const stampDate = dtstamp
         ? this.parseICalDate(dtstamp)
         : new Date();

@@ -13,6 +13,7 @@ import {
 import { CalendarSyncService } from './reservation/application/services/calendar-sync.service';
 import { EmailSyncService } from './evenement/application/services/email-sync.service';
 import { EventProcessorService } from './reservation/application/services/event-processor.service';
+import { StatistiquesService } from './statistiques/application/services/statistiques.service';
 
 @ApiTags('jobs')
 @Controller('jobs')
@@ -23,6 +24,7 @@ export class JobsController {
     private readonly calendarSyncService: CalendarSyncService,
     private readonly emailSyncService: EmailSyncService,
     private readonly eventProcessorService: EventProcessorService,
+    private readonly statistiquesService: StatistiquesService,
   ) {}
 
   @Post('calendar-sync')
@@ -71,6 +73,22 @@ export class JobsController {
     this.logger.log('Déclenchement manuel du traitement des événements');
     await this.eventProcessorService.processEvents();
     return { message: 'Traitement des événements lancé avec succès' };
+  }
+
+  @Post('statistiques')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Déclencher manuellement le calcul des statistiques',
+    description: 'Lance le calcul et la sauvegarde des statistiques',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Calcul des statistiques lancé avec succès',
+  })
+  async triggerStatistiques(): Promise<{ message: string }> {
+    this.logger.log('Déclenchement manuel du calcul des statistiques');
+    await this.statistiquesService.calculateAndSaveStatistics();
+    return { message: 'Calcul des statistiques lancé avec succès' };
   }
 }
 

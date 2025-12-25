@@ -20,6 +20,14 @@ export class ReservationRepository {
     return this.reservationModel.find().exec();
   }
 
+  /**
+   * Récupère toutes les réservations sous forme d'objets JavaScript simples (sans les méthodes Mongoose)
+   * Utile pour les calculs de statistiques où on n'a pas besoin des fonctionnalités Mongoose
+   */
+  async findAllLean(): Promise<any[]> {
+    return this.reservationModel.find().lean().exec();
+  }
+
   async findById(id: string): Promise<ReservationDocument | null> {
     return this.reservationModel.findById(id).exec();
   }
@@ -81,6 +89,46 @@ export class ReservationRepository {
 
   async findByCalendarUrlId(calendarUrlId: string): Promise<ReservationDocument[]> {
     return this.reservationModel.find({ calendarUrlId }).exec();
+  }
+
+  /**
+   * Récupère les réservations valides (non blocages manuels, prix > 0) dont la date de début est dans une plage de dates
+   * Retourne des objets JavaScript simples (lean) pour les calculs
+   * @param startDate Date de début de la plage
+   * @param endDate Date de fin de la plage
+   * @returns Liste des réservations valides triées par date de début
+   */
+  async findValidReservationsByStartDateRange(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<any[]> {
+    return this.reservationModel
+      .find({
+        type: { $ne: 'manual_block_date' },
+        price: { $gt: 0 },
+        startDate: { $gte: startDate, $lte: endDate },
+      })
+      .sort({ startDate: 1 })
+      .lean()
+      .exec();
+  }
+
+  /**
+   * Récupère les réservations valides (non blocages manuels, prix > 0) dont la date de début est après une date donnée
+   * Retourne des objets JavaScript simples (lean) pour les calculs
+   * @param afterDate Date après laquelle chercher
+   * @returns Liste des réservations valides triées par date de début
+   */
+  async findValidReservationsAfterDate(afterDate: Date): Promise<any[]> {
+    return this.reservationModel
+      .find({
+        type: { $ne: 'manual_block_date' },
+        price: { $gt: 0 },
+        startDate: { $gt: afterDate },
+      })
+      .sort({ startDate: 1 })
+      .lean()
+      .exec();
   }
 }
 

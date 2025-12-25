@@ -50,6 +50,11 @@ export const Navbar = () => {
               Planning
             </Button>
           </NextLink>
+          <NextLink href="/statistiques">
+            <Button variant="flat" size="sm">
+              Statistiques
+            </Button>
+          </NextLink>
           <NextLink href="/parametres">
             <Button variant="flat" size="sm">
               Paramètres
@@ -106,6 +111,17 @@ export const Navbar = () => {
               >
                 <Button variant="flat" className="w-full justify-start">
                   Planning
+                </Button>
+              </NextLink>
+            </NavbarMenuItem>
+            <NavbarMenuItem>
+              <NextLink
+                href="/statistiques"
+                className="w-full"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Button variant="flat" className="w-full justify-start">
+                  Statistiques
                 </Button>
               </NextLink>
             </NavbarMenuItem>

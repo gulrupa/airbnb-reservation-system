@@ -28,5 +28,13 @@ export const jobsApi = {
   triggerEventProcessor: async (): Promise<{ message: string }> => {
     return api.post<{ message: string }>('/jobs/event-processor');
   },
+
+  /**
+   * Déclenche manuellement le calcul des statistiques
+   * @returns Message de confirmation
+   */
+  triggerStatistiques: async (): Promise<{ message: string }> => {
+    return api.post<{ message: string }>('/jobs/statistiques');
+  },
 };
 

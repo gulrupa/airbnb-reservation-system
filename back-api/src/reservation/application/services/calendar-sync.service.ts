@@ -188,7 +188,6 @@ export class CalendarSyncService implements OnModuleInit {
       const updateDto: UpdateReservationDto = {
         startDate: newReservation.startDate,
         endDate: newReservation.endDate,
-        price: newReservation.price,
         numberOfTravelers: newReservation.numberOfTravelers,
         type: newReservation.type,
         calendarUrlId,

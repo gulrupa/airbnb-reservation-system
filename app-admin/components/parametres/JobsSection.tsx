@@ -15,16 +15,18 @@ export function JobsSection() {
     calendarSync: boolean;
     emailSync: boolean;
     eventProcessor: boolean;
+    statistiques: boolean;
   }>({
     calendarSync: false,
     emailSync: false,
     eventProcessor: false,
+    statistiques: false,
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const handleJob = async (
-    jobName: 'calendarSync' | 'emailSync' | 'eventProcessor',
+    jobName: 'calendarSync' | 'emailSync' | 'eventProcessor' | 'statistiques',
     jobFunction: () => Promise<{ message: string }>,
     jobLabel: string,
   ) => {
@@ -160,6 +162,39 @@ export function JobsSection() {
                 isLoading={loading.eventProcessor}
               >
                 {loading.eventProcessor ? (
+                  <>
+                    <Spinner size="sm" className="mr-2" />
+                    En cours...
+                  </>
+                ) : (
+                  'Lancer'
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Job: Calcul des statistiques */}
+          <div className="p-4 border rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h3 className="font-semibold text-base sm:text-lg">Calcul des statistiques</h3>
+                <p className="text-xs text-default-500">
+                  Calcule et sauvegarde toutes les statistiques (revenus, taux de remplissage, etc.)
+                </p>
+              </div>
+              <Button
+                color="primary"
+                onPress={() =>
+                  handleJob(
+                    'statistiques',
+                    jobsApi.triggerStatistiques,
+                    'Calcul des statistiques',
+                  )
+                }
+                isDisabled={loading.statistiques}
+                isLoading={loading.statistiques}
+              >
+                {loading.statistiques ? (
                   <>
                     <Spinner size="sm" className="mr-2" />
                     En cours...

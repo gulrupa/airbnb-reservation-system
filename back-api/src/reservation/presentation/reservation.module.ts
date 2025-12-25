@@ -73,6 +73,7 @@ import {
   ],
   exports: [
     ReservationService,
+    ReservationRepository,
     AirbnbCalendarService,
     CalendarUrlRepository,
     CalendarSyncService,

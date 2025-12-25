@@ -15,6 +15,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ReservationModule } from './reservation/presentation/reservation.module';
 import { AnnonceModule } from './annonce/presentation/annonce.module';
+import { EvenementModule } from './evenement/presentation/evenement.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { AnnonceModule } from './annonce/presentation/annonce.module';
     }),
     ReservationModule,
     AnnonceModule,
+    EvenementModule,
   ],
   controllers: [AppController],
   providers: [

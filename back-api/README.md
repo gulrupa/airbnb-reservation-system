@@ -8,6 +8,7 @@ API NestJS pour la gestion des réservations et des calendriers Airbnb.
 - **Gestion des annonces** : CRUD complet pour les annonces avec association de calendriers
 - **Gestion des URLs de calendrier** : Stockage et gestion des URLs de calendrier iCal
 - **Intégration Airbnb** : Récupération et parsing automatique des calendriers Airbnb
+- **Synchronisation des emails Airbnb** : Récupération automatique des emails Airbnb via IMAP et stockage des événements (versements, créations, annulations de réservations)
 - **Authentification Keycloak** : Protection de toutes les routes avec Keycloak via `nest-keycloak-connect`
 - **Validation des données** : Validation automatique avec support des dates au format `YYYY-MM-DD` ou ISO 8601
 - **Logging avancé** : Logging complet de toutes les requêtes et erreurs
@@ -270,6 +271,12 @@ npm run format         # Formater le code avec Prettier
 | `KEYCLOAK_CLIENT_ID` | ID du client Keycloak | `app-admin` | `app-admin` |
 | `KEYCLOAK_SECRET` | Secret du client Keycloak (optionnel pour les clients publics) | - | - |
 | `CORS_ORIGIN` | Origines autorisées pour CORS (séparées par des virgules) | `http://localhost:3001` | `http://localhost:3001` |
+| `EMAIL_SYNC_CRON` | Expression cron pour la synchronisation automatique des emails Airbnb | `0 */6 * * *` (toutes les 6 heures) | `0 */6 * * *` |
+| `EMAIL_USER` | Adresse email pour la connexion IMAP | `user@example.com` | - |
+| `EMAIL_PASSWORD` | Mot de passe de l'adresse email | `password123` | - |
+| `EMAIL_HOST` | Serveur IMAP | `imap.gmail.com` | `imap.gmail.com` |
+| `EMAIL_PORT` | Port IMAP | `993` | `993` |
+| `EMAIL_TLS` | Activer TLS pour IMAP | `true` | `true` |
 
 ### Format de l'expression cron
 

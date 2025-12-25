@@ -277,6 +277,7 @@ npm run format         # Formater le code avec Prettier
 | `EMAIL_HOST` | Serveur IMAP | `imap.gmail.com` | `imap.gmail.com` |
 | `EMAIL_PORT` | Port IMAP | `993` | `993` |
 | `EMAIL_TLS` | Activer TLS pour IMAP | `true` | `true` |
+| `EVENT_PROCESSOR_CRON` | Expression cron pour le traitement automatique des événements | `*/5 * * * *` (toutes les 5 minutes) | `*/5 * * * *` |
 
 ### Format de l'expression cron
 

@@ -22,6 +22,9 @@ export class Evenement {
 
   @Prop({ type: Number })
   prix?: number; // Prix en euros (optionnel, peut être 0 pour certaines annulations)
+
+  @Prop({ default: false, index: true })
+  traite?: boolean; // Indique si l'événement a été traité
 }
 
 export const EvenementSchema = SchemaFactory.createForClass(Evenement);

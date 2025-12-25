@@ -75,5 +75,14 @@ export class UpdateReservationDto {
   @IsOptional()
   @IsMongoId()
   calendarUrlId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Statut de la réservation',
+    example: 'confirmed',
+    enum: ['confirmed', 'paid', 'canceled'],
+  })
+  @IsOptional()
+  @IsEnum(['confirmed', 'paid', 'canceled'])
+  status?: string;
 }
 

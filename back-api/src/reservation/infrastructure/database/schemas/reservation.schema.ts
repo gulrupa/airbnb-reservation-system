@@ -37,6 +37,13 @@ export class Reservation {
 
   @Prop({ type: Types.ObjectId, ref: 'CalendarUrl', index: true })
   calendarUrlId?: Types.ObjectId;
+
+  @Prop({ 
+    enum: ['confirmed', 'paid', 'canceled'], 
+    default: 'confirmed',
+    index: true 
+  })
+  status?: string; // 'confirmed', 'paid', 'canceled'
 }
 
 export const ReservationSchema = SchemaFactory.createForClass(Reservation);

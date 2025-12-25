@@ -6,6 +6,7 @@ import { CalendarUrlController } from './controllers/calendar-url.controller';
 import { ReservationService } from '../application/services/reservation.service';
 import { CalendarUrlService } from '../application/services/calendar-url.service';
 import { CalendarSyncService } from '../application/services/calendar-sync.service';
+import { EventProcessorService } from '../application/services/event-processor.service';
 import { ReservationRepository } from '../application/repositories/reservation.repository';
 import { CalendarUrlRepository } from '../application/repositories/calendar-url.repository';
 import { AirbnbCalendarService } from '../application/services/airbnb/airbnb-calendar.service';
@@ -15,6 +16,7 @@ import { AirbnbReservationMapper } from '../infrastructure/mappers/airbnb/airbnb
 import { ICalendarFetcher } from '../domain/interfaces/calendar-fetcher.interface';
 import { IAirbnbCalendarParser } from '../infrastructure/calendar/parsers/airbnb/interfaces/airbnb-calendar-parser.interface';
 import { IAirbnbReservationMapper } from '../infrastructure/mappers/airbnb/interfaces/airbnb-reservation-mapper.interface';
+import { EvenementModule } from '../../evenement/presentation/evenement.module';
 import {
   CalendarUrl,
   CalendarUrlSchema,
@@ -27,6 +29,7 @@ import {
 @Module({
   imports: [
     HttpModule,
+    EvenementModule,
     MongooseModule.forFeature([
       { name: CalendarUrl.name, schema: CalendarUrlSchema },
       { name: Reservation.name, schema: ReservationSchema },
@@ -39,6 +42,7 @@ import {
     CalendarUrlService,
     CalendarUrlRepository,
     CalendarSyncService,
+    EventProcessorService,
     // Injection des implémentations concrètes avec leurs interfaces génériques
     {
       provide: 'ICalendarFetcher',

@@ -94,9 +94,10 @@ export class EmailParserService {
     body: string,
     reservationId: string,
   ): ParsedEmailEvent {
+    let prix = 0
     // Vérifier si c'est un remboursement total
     const remboursementTotalMatch = body.match(
-      /Conform=C3=A9ment =C3=A0 vos conditions d'annulation, un remboursement total a =C3=A9t=C3=A9 envoy=C3=A9 au voyageur/i,
+      /un remboursement total/i,
     );
 
     if (remboursementTotalMatch) {
@@ -110,7 +111,6 @@ export class EmailParserService {
     // Format: "Son montant est maintenant de 189,90=C2=A0=E2==82=AC"
     // Note: il y a une double égal dans l'exemple fourni, probablement une erreur de copie
     // Mailparser devrait décoder automatiquement, mais on garde les deux patterns pour sécurité
-    let prix: number | undefined;
 
     // Essayer de trouver le prix avec encodage Quoted-Printable (si pas décodé)
     const prixMatchEncoded = body.match(

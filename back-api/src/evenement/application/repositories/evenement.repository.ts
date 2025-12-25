@@ -31,5 +31,15 @@ export class EvenementRepository {
   async findByType(type: string): Promise<EvenementDocument[]> {
     return this.evenementModel.find({ type }).exec();
   }
+
+  async findNonTraites(): Promise<EvenementDocument[]> {
+    return this.evenementModel.find({ traite: { $ne: true } }).exec();
+  }
+
+  async markAsTraite(id: string): Promise<EvenementDocument | null> {
+    return this.evenementModel
+      .findByIdAndUpdate(id, { traite: true }, { new: true })
+      .exec();
+  }
 }
 

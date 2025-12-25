@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
@@ -14,24 +13,22 @@ import { Spinner } from '@heroui/spinner';
 import { annonceApi } from '@/lib/annonce-api';
 import { calendarApi } from '@/lib/calendar-api';
 import type { Annonce, CreateAnnonceDto, UpdateAnnonceDto } from '@/types/annonce';
-import type { CalendarUrl, Reservation } from '@/types/calendar';
+import type { CalendarUrl } from '@/types/calendar';
 
 /**
- * Page de gestion des annonces.
- * Permet de lister, créer, modifier et supprimer les annonces.
- * Les annonces peuvent être associées à plusieurs calendriers.
+ * Section de gestion des annonces dans la page Paramètres
+ * Permet de lister, créer, modifier et supprimer les annonces
+ * Les annonces peuvent être associées à plusieurs calendriers
  */
-export default function AnnoncesPage() {
-  // États d'authentification et de navigation
-  const { authenticated, loading: authLoading } = useAuth();
+export function AnnoncesSection() {
   const router = useRouter();
-
+  
   // États pour les données et le chargement
-  const [annonces, setAnnonces] = useState<Annonce[]>([]); // Liste des annonces
-  const [calendars, setCalendars] = useState<CalendarUrl[]>([]); // Liste des calendriers pour la sélection
-  const [loading, setLoading] = useState(true); // État de chargement principal
-  const [deleting, setDeleting] = useState<string | null>(null); // ID de l'annonce en cours de suppression
-  const [error, setError] = useState<string | null>(null); // Message d'erreur
+  const [annonces, setAnnonces] = useState<Annonce[]>([]);
+  const [calendars, setCalendars] = useState<CalendarUrl[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // États pour les modals de création et d'édition
   const {
@@ -56,32 +53,28 @@ export default function AnnoncesPage() {
   const [selectedCalendarIds, setSelectedCalendarIds] = useState<Set<string>>(new Set());
   const [selectedBlockedAnnonceIds, setSelectedBlockedAnnonceIds] = useState<Set<string>>(new Set());
 
-  // États pour la modal des indisponibilités
-  const {
-    isOpen: isUnavailabilitiesOpen,
-    onOpen: onUnavailabilitiesOpen,
-    onClose: onUnavailabilitiesClose,
-  } = useDisclosure();
-  const [selectedAnnonceForUnavailabilities, setSelectedAnnonceForUnavailabilities] = useState<Annonce | null>(null);
-  const [unavailabilities, setUnavailabilities] = useState<Reservation[]>([]);
-  const [loadingUnavailabilities, setLoadingUnavailabilities] = useState(false);
+  // État pour détecter si on est sur mobile
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Redirection vers la page de login si non authentifié
+  // Détection de la taille de l'écran
   useEffect(() => {
-    if (!authLoading && !authenticated) {
-      router.push('/login');
-    }
-  }, [authenticated, authLoading, router]);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
-  // Chargement des données une fois authentifié
+  // Chargement des données au montage du composant
   useEffect(() => {
-    if (authenticated) {
-      loadData();
-    }
-  }, [authenticated]);
+    loadData();
+  }, []);
 
   /**
-   * Charge la liste des annonces et des calendriers depuis l'API backend.
+   * Charge la liste des annonces et des calendriers depuis l'API backend
    */
   const loadData = async () => {
     try {
@@ -101,8 +94,7 @@ export default function AnnoncesPage() {
   };
 
   /**
-   * Gère la création d'une nouvelle annonce.
-   * Envoie les données du formulaire à l'API et recharge la liste.
+   * Gère la création d'une nouvelle annonce
    */
   const handleCreate = async () => {
     try {
@@ -113,17 +105,16 @@ export default function AnnoncesPage() {
         blockedByAnnonceIds: Array.from(selectedBlockedAnnonceIds),
       };
       await annonceApi.create(data);
-      await loadData(); // Recharge la liste après création
-      onCreateClose(); // Ferme la modal
-      resetForm(); // Réinitialise le formulaire
+      await loadData();
+      onCreateClose();
+      resetForm();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la création');
     }
   };
 
   /**
-   * Prépare le formulaire d'édition avec les données de l'annonce sélectionnée.
-   * @param annonce - L'annonce à modifier
+   * Prépare le formulaire d'édition avec les données de l'annonce sélectionnée
    */
   const handleEdit = (annonce: Annonce) => {
     setEditingAnnonce(annonce);
@@ -134,7 +125,7 @@ export default function AnnoncesPage() {
       calendarUrlIds: [],
     });
 
-    // Extraire les IDs des calendriers (peuvent être des objets ou des strings)
+    // Extraire les IDs des calendriers
     const calendarIds = (annonce.calendarUrlIds || []).map((cal) => {
       if (typeof cal === 'string') {
         return cal;
@@ -143,7 +134,7 @@ export default function AnnoncesPage() {
     });
     setSelectedCalendarIds(new Set(calendarIds));
 
-    // Extraire les IDs des annonces qui bloquent (peuvent être des objets ou des strings)
+    // Extraire les IDs des annonces qui bloquent
     const blockedAnnonceIds = (annonce.blockedByAnnonceIds || []).map((ann) => {
       if (typeof ann === 'string') {
         return ann;
@@ -152,12 +143,11 @@ export default function AnnoncesPage() {
     });
     setSelectedBlockedAnnonceIds(new Set(blockedAnnonceIds));
 
-    onEditOpen(); // Ouvre la modal d'édition
+    onEditOpen();
   };
 
   /**
-   * Met à jour une annonce existante.
-   * Envoie les données du formulaire à l'API et recharge la liste.
+   * Met à jour une annonce existante
    */
   const handleUpdate = async () => {
     if (!editingAnnonce) return;
@@ -170,18 +160,17 @@ export default function AnnoncesPage() {
         blockedByAnnonceIds: Array.from(selectedBlockedAnnonceIds),
       };
       await annonceApi.update(editingAnnonce._id, data);
-      await loadData(); // Recharge la liste après mise à jour
-      onEditClose(); // Ferme la modal
-      resetForm(); // Réinitialise le formulaire
-      setEditingAnnonce(null); // Réinitialise l'annonce en édition
+      await loadData();
+      onEditClose();
+      resetForm();
+      setEditingAnnonce(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour');
     }
   };
 
   /**
-   * Supprime une annonce après confirmation.
-   * @param id - ID de l'annonce à supprimer
+   * Supprime une annonce après confirmation
    */
   const handleDelete = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce ?')) {
@@ -189,19 +178,19 @@ export default function AnnoncesPage() {
     }
 
     try {
-      setDeleting(id); // Indique que cette annonce est en cours de suppression
+      setDeleting(id);
       setError(null);
       await annonceApi.delete(id);
-      await loadData(); // Recharge la liste après suppression
+      await loadData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la suppression');
     } finally {
-      setDeleting(null); // Réinitialise l'état de suppression
+      setDeleting(null);
     }
   };
 
   /**
-   * Réinitialise le formulaire aux valeurs par défaut.
+   * Réinitialise le formulaire aux valeurs par défaut
    */
   const resetForm = () => {
     setFormData({
@@ -215,42 +204,15 @@ export default function AnnoncesPage() {
   };
 
   /**
-   * Charge et affiche les indisponibilités d'une annonce.
-   * @param annonce - L'annonce pour laquelle afficher les indisponibilités
+   * Redirige vers la page des indisponibilités d'une annonce
    */
-  const handleViewUnavailabilities = async (annonce: Annonce) => {
-    setSelectedAnnonceForUnavailabilities(annonce);
-    setLoadingUnavailabilities(true);
-    setUnavailabilities([]);
-    onUnavailabilitiesOpen();
-
-    try {
-      const data = await annonceApi.getUnavailabilities(annonce._id);
-      setUnavailabilities(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des indisponibilités');
-    } finally {
-      setLoadingUnavailabilities(false);
-    }
+  const handleViewUnavailabilities = (annonce: Annonce) => {
+    router.push(`/annonces/${annonce._id}/indisponibilites`);
   };
 
-  /**
-   * Formate une date ISO en format français lisible
-   * @param dateString - Date au format ISO 8601
-   * @returns Date formatée en français (ex: "21 décembre 2025")
-   */
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   /**
-   * Récupère le titre d'une annonce à partir de son ID.
-   * @param annonceId - ID de l'annonce
-   * @returns Le titre de l'annonce ou "Annonce inconnue"
+   * Récupère le titre d'une annonce à partir de son ID
    */
   const getAnnonceTitle = (annonceId: string | Annonce): string => {
     if (typeof annonceId === 'string') {
@@ -261,9 +223,7 @@ export default function AnnoncesPage() {
   };
 
   /**
-   * Récupère le nom d'un calendrier à partir de son ID.
-   * @param calendarId - ID du calendrier
-   * @returns Le nom du calendrier ou "Calendrier inconnu"
+   * Récupère le nom d'un calendrier à partir de son ID
    */
   const getCalendarName = (calendarId: string | CalendarUrl): string => {
     if (typeof calendarId === 'string') {
@@ -273,24 +233,18 @@ export default function AnnoncesPage() {
     return calendarId.name || calendarId.url || 'Calendrier inconnu';
   };
 
-  // Affichage d'un spinner pendant le chargement initial
-  if (authLoading || loading) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center py-8">
         <Spinner size="lg" />
       </div>
     );
   }
 
-  // Ne rien afficher si non authentifié (redirection gérée par useEffect)
-  if (!authenticated) {
-    return null;
-  }
-
   return (
-    <div className="container mx-auto p-3 sm:p-6 max-w-7xl">
+    <>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-3xl font-bold">Gestion des annonces</h1>
+        <h2 className="text-xl sm:text-2xl font-semibold">Gestion des annonces</h2>
         <Button color="primary" onPress={onCreateOpen} size="sm" className="w-full sm:w-auto">
           Ajouter une annonce
         </Button>
@@ -306,12 +260,13 @@ export default function AnnoncesPage() {
 
       <Card>
         <CardHeader className="pb-2">
-          <h2 className="text-lg sm:text-xl font-semibold">Liste des annonces</h2>
+          <h3 className="text-lg sm:text-xl font-semibold">Liste des annonces</h3>
         </CardHeader>
         <CardBody className="p-0 sm:p-6">
           {/* Version desktop : Tableau */}
-          <div className="hidden md:block overflow-x-auto">
-            <Table aria-label="Table des annonces">
+          {!isMobile && (
+            <div className="overflow-x-auto">
+              <Table aria-label="Table des annonces">
               <TableHeader>
                 <TableColumn>Titre</TableColumn>
                 <TableColumn>Description</TableColumn>
@@ -393,23 +348,23 @@ export default function AnnoncesPage() {
                 ))}
               </TableBody>
             </Table>
-          </div>
+            </div>
+          )}
 
           {/* Version mobile : Cards */}
-          <div className="md:hidden space-y-3 p-4">
+          {isMobile && (
+            <div className="space-y-3 p-3 sm:p-4">
             {annonces.length === 0 ? (
               <p className="text-center text-default-500 py-8">Aucune annonce</p>
             ) : (
               annonces.map((annonce) => (
-                <Card key={annonce._id} className="shadow-sm">
-                  <CardBody className="p-4">
-                    <div className="space-y-3">
-                      {/* Titre */}
+                <Card key={annonce._id} className="shadow-sm border border-default-200">
+                  <CardBody className="p-4 sm:p-5">
+                    <div className="space-y-3 sm:space-y-4">
                       <div>
-                        <h3 className="font-semibold text-base mb-1">{annonce.title}</h3>
+                        <h3 className="font-semibold text-base sm:text-lg mb-1">{annonce.title}</h3>
                       </div>
 
-                      {/* Description */}
                       {annonce.description && (
                         <div>
                           <p className="text-xs text-default-500 mb-1">Description</p>
@@ -417,7 +372,6 @@ export default function AnnoncesPage() {
                         </div>
                       )}
 
-                      {/* Adresse */}
                       {annonce.address && (
                         <div>
                           <p className="text-xs text-default-500 mb-1">Adresse</p>
@@ -425,7 +379,6 @@ export default function AnnoncesPage() {
                         </div>
                       )}
 
-                      {/* Calendriers */}
                       <div>
                         <p className="text-xs text-default-500 mb-2">Calendriers associés</p>
                         <div className="flex flex-wrap gap-1">
@@ -441,7 +394,6 @@ export default function AnnoncesPage() {
                         </div>
                       </div>
 
-                      {/* Annonces bloquantes */}
                       <div>
                         <p className="text-xs text-default-500 mb-2">Bloquée par</p>
                         <div className="flex flex-wrap gap-1">
@@ -457,9 +409,8 @@ export default function AnnoncesPage() {
                         </div>
                       </div>
 
-                      {/* Actions */}
-                      <div className="pt-2 border-t border-default-200">
-                        <p className="text-xs text-default-500 mb-2">Actions</p>
+                      <div className="pt-3 border-t border-default-200">
+                        <p className="text-xs text-default-500 mb-2 font-medium">Actions</p>
                         <div className="grid grid-cols-2 gap-2">
                           <Button
                             size="sm"
@@ -496,16 +447,26 @@ export default function AnnoncesPage() {
                 </Card>
               ))
             )}
-          </div>
+            </div>
+          )}
         </CardBody>
       </Card>
 
       {/* Modal de création */}
-      <Modal isOpen={isCreateOpen} onClose={onCreateClose} size="2xl" scrollBehavior="inside">
+      <Modal 
+        isOpen={isCreateOpen} 
+        onClose={onCreateClose} 
+        size="2xl" 
+        scrollBehavior="inside"
+        classNames={{
+          base: "max-w-[95vw] sm:max-w-2xl",
+          body: "p-3 sm:p-6"
+        }}
+      >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
+              <ModalHeader className="flex flex-col gap-1 text-lg sm:text-xl">
                 Ajouter une nouvelle annonce
               </ModalHeader>
               <ModalBody>
@@ -565,11 +526,11 @@ export default function AnnoncesPage() {
                   ))}
                 </Select>
               </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
+              <ModalFooter className="flex-col sm:flex-row gap-2">
+                <Button variant="flat" onPress={onClose} className="w-full sm:w-auto">
                   Annuler
                 </Button>
-                <Button color="primary" onPress={handleCreate}>
+                <Button color="primary" onPress={handleCreate} className="w-full sm:w-auto">
                   Créer
                 </Button>
               </ModalFooter>
@@ -579,11 +540,20 @@ export default function AnnoncesPage() {
       </Modal>
 
       {/* Modal d'édition */}
-      <Modal isOpen={isEditOpen} onClose={onEditClose} size="2xl" scrollBehavior="inside">
+      <Modal 
+        isOpen={isEditOpen} 
+        onClose={onEditClose} 
+        size="2xl" 
+        scrollBehavior="inside"
+        classNames={{
+          base: "max-w-[95vw] sm:max-w-2xl",
+          body: "p-3 sm:p-6"
+        }}
+      >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
+              <ModalHeader className="flex flex-col gap-1 text-lg sm:text-xl">
                 Modifier l'annonce
               </ModalHeader>
               <ModalBody>
@@ -645,11 +615,11 @@ export default function AnnoncesPage() {
                     ))}
                 </Select>
               </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
+              <ModalFooter className="flex-col sm:flex-row gap-2">
+                <Button variant="flat" onPress={onClose} className="w-full sm:w-auto">
                   Annuler
                 </Button>
-                <Button color="primary" onPress={handleUpdate}>
+                <Button color="primary" onPress={handleUpdate} className="w-full sm:w-auto">
                   Mettre à jour
                 </Button>
               </ModalFooter>
@@ -658,80 +628,7 @@ export default function AnnoncesPage() {
         </ModalContent>
       </Modal>
 
-      {/* Modal des indisponibilités */}
-      <Modal isOpen={isUnavailabilitiesOpen} onClose={onUnavailabilitiesClose} size="3xl" scrollBehavior="inside">
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Indisponibilités - {selectedAnnonceForUnavailabilities?.title || ''}
-              </ModalHeader>
-              <ModalBody>
-                {loadingUnavailabilities ? (
-                  <div className="flex justify-center py-8">
-                    <Spinner size="lg" />
-                  </div>
-                ) : unavailabilities.length === 0 ? (
-                  <p className="text-center text-default-500 py-8">
-                    Aucune indisponibilité trouvée
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    <p className="text-sm text-default-600">
-                      {unavailabilities.length} réservation(s) trouvée(s)
-                    </p>
-                    <Table aria-label="Table des indisponibilités">
-                      <TableHeader>
-                        <TableColumn>ID Externe</TableColumn>
-                        <TableColumn>Date de début</TableColumn>
-                        <TableColumn>Date de fin</TableColumn>
-                        <TableColumn>Prix</TableColumn>
-                        <TableColumn>Voyageurs</TableColumn>
-                        <TableColumn>Type</TableColumn>
-                      </TableHeader>
-                      <TableBody>
-                        {unavailabilities.map((reservation) => (
-                          <TableRow key={reservation._id}>
-                            <TableCell>
-                              <p className="font-mono text-sm">{reservation.externalId}</p>
-                            </TableCell>
-                            <TableCell>{formatDate(reservation.startDate)}</TableCell>
-                            <TableCell>{formatDate(reservation.endDate)}</TableCell>
-                            <TableCell>
-                              {new Intl.NumberFormat('fr-FR', {
-                                style: 'currency',
-                                currency: 'EUR',
-                              }).format(reservation.price)}
-                            </TableCell>
-                            <TableCell>{reservation.numberOfTravelers}</TableCell>
-                            <TableCell>
-                              <Chip
-                                size="sm"
-                                color={reservation.type === 'manual_block_date' ? 'warning' : 'primary'}
-                                variant="flat"
-                              >
-                                {reservation.type === 'manual_block_date'
-                                  ? 'Blocage manuel'
-                                  : 'Réservation'}
-                              </Chip>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
-                  Fermer
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-    </div>
+    </>
   );
 }
 

@@ -30,6 +30,19 @@ export default function CalendarReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]); // Liste des réservations
   const [loading, setLoading] = useState(true); // État de chargement
   const [error, setError] = useState<string | null>(null); // Message d'erreur
+  const [isMobile, setIsMobile] = useState(false); // État pour détecter mobile
+
+  // Détection de la taille de l'écran
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Redirection vers la page de login si non authentifié
   useEffect(() => {
@@ -99,11 +112,11 @@ export default function CalendarReservationsPage() {
       <div className="mb-4 sm:mb-6">
         <Button 
           variant="flat" 
-          onPress={() => router.push('/calendars')} 
+          onPress={() => router.push('/parametres')} 
           className="mb-3 sm:mb-4"
           size="sm"
         >
-          ← Retour aux calendriers
+          ← Retour aux paramètres
         </Button>
         {calendar && (
           <Card className="mb-4">
@@ -156,8 +169,9 @@ export default function CalendarReservationsPage() {
         </CardHeader>
         <CardBody className="p-0 sm:p-6">
           {/* Version desktop : Tableau */}
-          <div className="hidden md:block overflow-x-auto">
-            <Table aria-label="Table des réservations">
+          {!isMobile && (
+            <div className="overflow-x-auto">
+              <Table aria-label="Table des réservations">
               <TableHeader>
                 <TableColumn>ID Externe</TableColumn>
                 <TableColumn>Date de début</TableColumn>
@@ -196,21 +210,23 @@ export default function CalendarReservationsPage() {
                 ))}
               </TableBody>
             </Table>
-          </div>
+            </div>
+          )}
 
           {/* Version mobile : Cards */}
-          <div className="md:hidden space-y-3 p-4">
+          {isMobile && (
+            <div className="space-y-3 p-3 sm:p-4">
             {reservations.length === 0 ? (
               <p className="text-center text-default-500 py-8">Aucune réservation</p>
             ) : (
               reservations.map((reservation) => (
-                <Card key={reservation._id} className="shadow-sm">
-                  <CardBody className="p-4">
-                    <div className="space-y-3">
+                <Card key={reservation._id} className="shadow-sm border border-default-200">
+                  <CardBody className="p-4 sm:p-5">
+                    <div className="space-y-3 sm:space-y-4">
                       {/* ID Externe */}
                       <div>
                         <p className="text-xs text-default-500 mb-1">ID Externe</p>
-                        <p className="font-mono text-sm font-semibold break-all">
+                        <p className="font-mono text-sm text-default-900 break-all">
                           {reservation.externalId}
                         </p>
                       </div>
@@ -219,13 +235,13 @@ export default function CalendarReservationsPage() {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <p className="text-xs text-default-500 mb-1">Date de début</p>
-                          <p className="text-sm font-medium">
+                          <p className="text-sm text-default-900">
                             {formatDate(reservation.startDate)}
                           </p>
                         </div>
                         <div>
                           <p className="text-xs text-default-500 mb-1">Date de fin</p>
-                          <p className="text-sm font-medium">
+                          <p className="text-sm text-default-900">
                             {formatDate(reservation.endDate)}
                           </p>
                         </div>
@@ -235,7 +251,7 @@ export default function CalendarReservationsPage() {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <p className="text-xs text-default-500 mb-1">Prix</p>
-                          <p className="text-sm font-semibold">
+                          <p className="text-sm font-semibold text-default-900">
                             {new Intl.NumberFormat('fr-FR', {
                               style: 'currency',
                               currency: 'EUR',
@@ -244,7 +260,7 @@ export default function CalendarReservationsPage() {
                         </div>
                         <div>
                           <p className="text-xs text-default-500 mb-1">Voyageurs</p>
-                          <p className="text-sm font-medium">{reservation.numberOfTravelers}</p>
+                          <p className="text-sm text-default-900">{reservation.numberOfTravelers}</p>
                         </div>
                       </div>
 
@@ -266,7 +282,8 @@ export default function CalendarReservationsPage() {
                 </Card>
               ))
             )}
-          </div>
+            </div>
+          )}
         </CardBody>
       </Card>
     </div>

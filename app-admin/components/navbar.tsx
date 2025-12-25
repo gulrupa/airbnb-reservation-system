@@ -40,16 +40,6 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden sm:flex gap-2">
-          <NextLink href="/calendars">
-            <Button variant="flat" size="sm">
-              Calendriers
-            </Button>
-          </NextLink>
-          <NextLink href="/annonces">
-            <Button variant="flat" size="sm">
-              Annonces
-            </Button>
-          </NextLink>
           <NextLink href="/reservations">
             <Button variant="flat" size="sm">
               Réservations
@@ -58,6 +48,11 @@ export const Navbar = () => {
           <NextLink href="/agenda">
             <Button variant="flat" size="sm">
               Planning
+            </Button>
+          </NextLink>
+          <NextLink href="/parametres">
+            <Button variant="flat" size="sm">
+              Paramètres
             </Button>
           </NextLink>
           <ThemeSwitch />
@@ -94,28 +89,6 @@ export const Navbar = () => {
           <>
             <NavbarMenuItem>
               <NextLink
-                href="/calendars"
-                className="w-full"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Button variant="flat" className="w-full justify-start">
-                  Calendriers
-                </Button>
-              </NextLink>
-            </NavbarMenuItem>
-            <NavbarMenuItem>
-              <NextLink
-                href="/annonces"
-                className="w-full"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Button variant="flat" className="w-full justify-start">
-                  Annonces
-                </Button>
-              </NextLink>
-            </NavbarMenuItem>
-            <NavbarMenuItem>
-              <NextLink
                 href="/reservations"
                 className="w-full"
                 onClick={() => setIsMenuOpen(false)}
@@ -133,6 +106,17 @@ export const Navbar = () => {
               >
                 <Button variant="flat" className="w-full justify-start">
                   Planning
+                </Button>
+              </NextLink>
+            </NavbarMenuItem>
+            <NavbarMenuItem>
+              <NextLink
+                href="/parametres"
+                className="w-full"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Button variant="flat" className="w-full justify-start">
+                  Paramètres
                 </Button>
               </NextLink>
             </NavbarMenuItem>

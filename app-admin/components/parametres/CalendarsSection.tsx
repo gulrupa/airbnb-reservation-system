@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/table';
@@ -10,25 +9,22 @@ import { Chip } from '@heroui/chip';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/modal';
 import { Input } from '@heroui/input';
 import { Select, SelectItem } from '@heroui/select';
-import { Spinner } from '@heroui/spinner';
 import { calendarApi } from '@/lib/calendar-api';
 import type { CalendarUrl, CreateCalendarUrlDto, UpdateCalendarUrlDto } from '@/types/calendar';
 
 /**
- * Page de gestion des calendriers
+ * Section de gestion des calendriers dans la page Paramètres
  * Permet de lister, créer, modifier, supprimer et synchroniser les calendriers
  */
-export default function CalendarsPage() {
-  // État d'authentification
-  const { authenticated, loading: authLoading } = useAuth();
+export function CalendarsSection() {
   const router = useRouter();
 
   // États pour la gestion des calendriers
-  const [calendars, setCalendars] = useState<CalendarUrl[]>([]); // Liste des calendriers
-  const [loading, setLoading] = useState(true); // État de chargement initial
-  const [syncing, setSyncing] = useState<string | null>(null); // ID du calendrier en cours de synchronisation
-  const [deleting, setDeleting] = useState<string | null>(null); // ID du calendrier en cours de suppression
-  const [error, setError] = useState<string | null>(null); // Message d'erreur à afficher
+  const [calendars, setCalendars] = useState<CalendarUrl[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Gestion des modals (création et édition)
   const {
@@ -45,7 +41,6 @@ export default function CalendarsPage() {
 
   // État pour le calendrier en cours d'édition
   const [editingCalendar, setEditingCalendar] = useState<CalendarUrl | null>(null);
-  // Données du formulaire (utilisé pour création et édition)
   const [formData, setFormData] = useState<CreateCalendarUrlDto>({
     url: '',
     name: '',
@@ -54,19 +49,25 @@ export default function CalendarsPage() {
     isActive: true,
   });
 
-  // Redirection vers la page de login si non authentifié
-  useEffect(() => {
-    if (!authLoading && !authenticated) {
-      router.push('/login');
-    }
-  }, [authenticated, authLoading, router]);
+  // État pour détecter si on est sur mobile
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Chargement des calendriers une fois authentifié
+  // Détection de la taille de l'écran
   useEffect(() => {
-    if (authenticated) {
-      loadCalendars();
-    }
-  }, [authenticated]);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Chargement des calendriers au montage du composant
+  useEffect(() => {
+    loadCalendars();
+  }, []);
 
   /**
    * Charge la liste de tous les calendriers depuis l'API
@@ -91,7 +92,7 @@ export default function CalendarsPage() {
     try {
       setError(null);
       await calendarApi.create(formData);
-      await loadCalendars(); // Recharge la liste après création
+      await loadCalendars();
       onCreateClose();
       resetForm();
     } catch (err) {
@@ -101,7 +102,6 @@ export default function CalendarsPage() {
 
   /**
    * Prépare le formulaire d'édition avec les données du calendrier sélectionné
-   * @param calendar - Le calendrier à modifier
    */
   const handleEdit = (calendar: CalendarUrl) => {
     setEditingCalendar(calendar);
@@ -124,7 +124,7 @@ export default function CalendarsPage() {
     try {
       setError(null);
       await calendarApi.update(editingCalendar._id, formData);
-      await loadCalendars(); // Recharge la liste après mise à jour
+      await loadCalendars();
       onEditClose();
       resetForm();
       setEditingCalendar(null);
@@ -135,7 +135,6 @@ export default function CalendarsPage() {
 
   /**
    * Supprime un calendrier après confirmation
-   * @param id - ID du calendrier à supprimer
    */
   const handleDelete = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce calendrier ?')) {
@@ -146,7 +145,7 @@ export default function CalendarsPage() {
       setDeleting(id);
       setError(null);
       await calendarApi.delete(id);
-      await loadCalendars(); // Recharge la liste après suppression
+      await loadCalendars();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la suppression');
     } finally {
@@ -155,9 +154,7 @@ export default function CalendarsPage() {
   };
 
   /**
-   * Synchronise un calendrier avec l'API externe (Airbnb, etc.)
-   * Récupère les nouvelles réservations et met à jour les existantes
-   * @param id - ID du calendrier à synchroniser
+   * Synchronise un calendrier avec l'API externe
    */
   const handleSync = async (id: string) => {
     try {
@@ -165,7 +162,7 @@ export default function CalendarsPage() {
       setError(null);
       const result = await calendarApi.sync(id);
       alert(`Synchronisation terminée : ${result.created} créée(s), ${result.updated} mise(s) à jour`);
-      await loadCalendars(); // Recharge la liste après synchronisation
+      await loadCalendars();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la synchronisation');
     } finally {
@@ -186,22 +183,10 @@ export default function CalendarsPage() {
     });
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
-  if (!authenticated) {
-    return null;
-  }
-
   return (
-    <div className="container mx-auto p-3 sm:p-6 max-w-7xl">
+    <>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-3xl font-bold">Gestion des calendriers</h1>
+        <h2 className="text-xl sm:text-2xl font-semibold">Gestion des calendriers</h2>
         <Button color="primary" onPress={onCreateOpen} size="sm" className="w-full sm:w-auto">
           Ajouter un calendrier
         </Button>
@@ -217,12 +202,13 @@ export default function CalendarsPage() {
 
       <Card>
         <CardHeader className="pb-2">
-          <h2 className="text-lg sm:text-xl font-semibold">Liste des calendriers</h2>
+          <h3 className="text-lg sm:text-xl font-semibold">Liste des calendriers</h3>
         </CardHeader>
         <CardBody className="p-0 sm:p-6">
           {/* Version desktop : Tableau */}
-          <div className="hidden md:block overflow-x-auto">
-            <Table aria-label="Table des calendriers">
+          {!isMobile && (
+            <div className="overflow-x-auto">
+              <Table aria-label="Table des calendriers">
               <TableHeader>
                 <TableColumn>Nom</TableColumn>
                 <TableColumn>URL</TableColumn>
@@ -300,20 +286,21 @@ export default function CalendarsPage() {
                 ))}
               </TableBody>
             </Table>
-          </div>
+            </div>
+          )}
 
           {/* Version mobile : Cards */}
-          <div className="md:hidden space-y-3 p-4">
+          {isMobile && (
+            <div className="space-y-3 p-3 sm:p-4">
             {calendars.length === 0 ? (
               <p className="text-center text-default-500 py-8">Aucun calendrier</p>
             ) : (
               calendars.map((calendar) => (
-                <Card key={calendar._id} className="shadow-sm">
-                  <CardBody className="p-4">
-                    <div className="space-y-3">
-                      {/* Nom et Description */}
+                <Card key={calendar._id} className="shadow-sm border border-default-200">
+                  <CardBody className="p-4 sm:p-5">
+                    <div className="space-y-3 sm:space-y-4">
                       <div>
-                        <h3 className="font-semibold text-base mb-1">
+                        <h3 className="font-semibold text-base sm:text-lg mb-1">
                           {calendar.name || 'Sans nom'}
                         </h3>
                         {calendar.description && (
@@ -321,13 +308,11 @@ export default function CalendarsPage() {
                         )}
                       </div>
 
-                      {/* URL */}
                       <div>
                         <p className="text-xs text-default-500 mb-1">URL</p>
                         <p className="text-xs text-default-600 break-all">{calendar.url}</p>
                       </div>
 
-                      {/* Plateforme et Statut */}
                       <div className="flex items-center gap-3 flex-wrap">
                         <div>
                           <p className="text-xs text-default-500 mb-1">Plateforme</p>
@@ -347,9 +332,8 @@ export default function CalendarsPage() {
                         </div>
                       </div>
 
-                      {/* Actions */}
-                      <div className="pt-2 border-t border-default-200">
-                        <p className="text-xs text-default-500 mb-2">Actions</p>
+                      <div className="pt-3 border-t border-default-200">
+                        <p className="text-xs text-default-500 mb-2 font-medium">Actions</p>
                         <div className="grid grid-cols-2 gap-2">
                           <Button
                             size="sm"
@@ -396,14 +380,24 @@ export default function CalendarsPage() {
                 </Card>
               ))
             )}
-          </div>
+            </div>
+          )}
         </CardBody>
       </Card>
 
       {/* Modal de création */}
-      <Modal isOpen={isCreateOpen} onClose={onCreateClose} size="2xl" scrollBehavior="inside">
+      <Modal 
+        isOpen={isCreateOpen} 
+        onClose={onCreateClose} 
+        size="2xl" 
+        scrollBehavior="inside"
+        classNames={{
+          base: "max-w-[95vw] sm:max-w-2xl",
+          body: "p-3 sm:p-6"
+        }}
+      >
         <ModalContent>
-          <ModalHeader>Ajouter un calendrier</ModalHeader>
+          <ModalHeader className="text-lg sm:text-xl">Ajouter un calendrier</ModalHeader>
           <ModalBody>
             <Input
               label="URL du calendrier"
@@ -432,19 +426,15 @@ export default function CalendarsPage() {
                 setFormData({ ...formData, platform: selected });
               }}
             >
-              <SelectItem key="airbnb">
-                Airbnb
-              </SelectItem>
-              <SelectItem key="booking">
-                Booking
-              </SelectItem>
+              <SelectItem key="airbnb">Airbnb</SelectItem>
+              <SelectItem key="booking">Booking</SelectItem>
             </Select>
           </ModalBody>
-          <ModalFooter>
-            <Button variant="flat" onPress={onCreateClose}>
+          <ModalFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="flat" onPress={onCreateClose} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button color="primary" onPress={handleCreate}>
+            <Button color="primary" onPress={handleCreate} className="w-full sm:w-auto">
               Créer
             </Button>
           </ModalFooter>
@@ -452,9 +442,18 @@ export default function CalendarsPage() {
       </Modal>
 
       {/* Modal d'édition */}
-      <Modal isOpen={isEditOpen} onClose={onEditClose} size="2xl" scrollBehavior="inside">
+      <Modal 
+        isOpen={isEditOpen} 
+        onClose={onEditClose} 
+        size="2xl" 
+        scrollBehavior="inside"
+        classNames={{
+          base: "max-w-[95vw] sm:max-w-2xl",
+          body: "p-3 sm:p-6"
+        }}
+      >
         <ModalContent>
-          <ModalHeader>Modifier le calendrier</ModalHeader>
+          <ModalHeader className="text-lg sm:text-xl">Modifier le calendrier</ModalHeader>
           <ModalBody>
             <Input
               label="URL du calendrier"
@@ -483,25 +482,21 @@ export default function CalendarsPage() {
                 setFormData({ ...formData, platform: selected });
               }}
             >
-              <SelectItem key="airbnb">
-                Airbnb
-              </SelectItem>
-              <SelectItem key="booking">
-                Booking
-              </SelectItem>
+              <SelectItem key="airbnb">Airbnb</SelectItem>
+              <SelectItem key="booking">Booking</SelectItem>
             </Select>
           </ModalBody>
-          <ModalFooter>
-            <Button variant="flat" onPress={onEditClose}>
+          <ModalFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="flat" onPress={onEditClose} className="w-full sm:w-auto">
               Annuler
             </Button>
-            <Button color="primary" onPress={handleUpdate}>
+            <Button color="primary" onPress={handleUpdate} className="w-full sm:w-auto">
               Enregistrer
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </div>
+    </>
   );
 }
 

@@ -305,21 +305,143 @@ export default function ReservationsPage() {
           </CardHeader>
           <CardBody className="p-0 sm:p-6">
             <style jsx global>{`
-              /* Styles pour le thème sombre du calendrier - évite le blanc */
+              /* ============================================
+                 STYLES GÉNÉRAUX DU CALENDRIER
+                 ============================================ */
+              
+              /* Conteneur principal du calendrier - arrondi et ombre */
+              .rbc-calendar {
+                overflow: hidden !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+                background-color: #ffffff !important;
+              }
+              
               .dark .rbc-calendar {
                 background-color: #1a1a1a !important;
                 color: #e4e4e7 !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+              }
+              
+              /* En-tête du calendrier - arrondi en haut */
+              .rbc-header {
+                padding: 12px 8px !important;
+                font-weight: 600 !important;
+                border-bottom: 1px solid #e5e7eb !important;
+                background-color: #f9fafb !important;
+                color: #374151 !important;
+                border-color: #e5e7eb !important;
+              }
+              
+              .rbc-header + .rbc-header {
+                border-left: 1px solid #e5e7eb !important;
+              }
+              
+              /* Cibler tous les éléments de l'en-tête - sélecteurs plus spécifiques */
+              .rbc-month-view .rbc-header,
+              .rbc-month-view table thead th,
+              .rbc-month-view table thead th.rbc-header,
+              .rbc-month-view thead th,
+              .rbc-month-view thead th.rbc-header,
+              .rbc-month-view .rbc-row-bg .rbc-header,
+              .rbc-month-view .rbc-header-content {
+                background-color: #f9fafb !important;
+                color: #374151 !important;
+                border-color: #e5e7eb !important;
+              }
+              
+              /* Cibler aussi les cellules d'en-tête individuelles */
+              .rbc-month-view table thead tr th {
+                background-color: #f9fafb !important;
+                color: #374151 !important;
+                border-color: #e5e7eb !important;
               }
               
               .dark .rbc-header {
                 border-bottom-color: #3f3f46 !important;
+                border-color: #3f3f46 !important;
                 color: #e4e4e7 !important;
-                background-color: #1a1a1a !important;
+                background-color: #27272a !important;
+              }
+              
+              .dark .rbc-header + .rbc-header {
+                border-left-color: #3f3f46 !important;
+              }
+              
+              .dark .rbc-month-view .rbc-header,
+              .dark .rbc-month-view table thead th,
+              .dark .rbc-month-view table thead th.rbc-header,
+              .dark .rbc-month-view thead th,
+              .dark .rbc-month-view thead th.rbc-header,
+              .dark .rbc-month-view .rbc-row-bg .rbc-header,
+              .dark .rbc-month-view .rbc-header-content {
+                background-color: #27272a !important;
+                color: #e4e4e7 !important;
+                border-color: #3f3f46 !important;
+              }
+              
+              .dark .rbc-month-view table thead tr th {
+                background-color: #27272a !important;
+                color: #e4e4e7 !important;
+                border-color: #3f3f46 !important;
+              }
+              
+              /* Lignes et bordures du calendrier - grisées */
+              .rbc-day-bg {
+                border-color: #e5e7eb !important;
+                background-color: #ffffff !important;
+              }
+              
+              .rbc-month-view {
+                border-color: #e5e7eb !important;
+              }
+              
+              .rbc-month-view table {
+                border-color: #e5e7eb !important;
+              }
+              
+              .rbc-month-view table td {
+                border-color: #e5e7eb !important;
+              }
+              
+              .rbc-month-view table th {
+                border-color: #e5e7eb !important;
+              }
+              
+              .rbc-row {
+                border-color: #e5e7eb !important;
+              }
+              
+              .rbc-row-segment {
+                border-color: #e5e7eb !important;
               }
               
               .dark .rbc-day-bg {
                 border-color: #3f3f46 !important;
                 background-color: #1a1a1a !important;
+              }
+              
+              .dark .rbc-month-view {
+                border-color: #3f3f46 !important;
+              }
+              
+              .dark .rbc-month-view table {
+                border-color: #3f3f46 !important;
+              }
+              
+              .dark .rbc-month-view table td {
+                border-color: #3f3f46 !important;
+              }
+              
+              .dark .rbc-month-view table th {
+                border-color: #3f3f46 !important;
+              }
+              
+              .dark .rbc-row {
+                border-color: #3f3f46 !important;
+              }
+              
+              .dark .rbc-row-segment {
+                border-color: #3f3f46 !important;
               }
               
               .dark .rbc-today {
@@ -342,6 +464,14 @@ export default function ReservationsPage() {
                 color: #e4e4e7 !important;
               }
               
+              /* Barre d'outils - arrondie et stylisée */
+              .rbc-toolbar {
+                padding: 16px !important;
+                border-radius: 0 !important;
+                background-color: #f9fafb !important;
+                border-bottom: 1px solid #e5e7eb !important;
+              }
+              
               .dark .rbc-toolbar {
                 color: #e4e4e7 !important;
                 background-color: #1a1a1a !important;
@@ -356,12 +486,14 @@ export default function ReservationsPage() {
               .dark .rbc-toolbar button:hover {
                 background-color: #27272a !important;
                 color: #ffffff !important;
+                transform: translateY(-1px) !important;
               }
               
               .dark .rbc-toolbar button.rbc-active {
                 background-color: #9333ea !important;
                 color: #ffffff !important;
                 border-color: #9333ea !important;
+                box-shadow: 0 2px 4px rgba(147, 51, 234, 0.3) !important;
               }
               
               .dark .rbc-time-slot {
@@ -394,7 +526,6 @@ export default function ReservationsPage() {
               
               .dark .rbc-agenda-view table tbody td {
                 border-color: #3f3f46 !important;
-                color: #e4e4e7 !important;
               }
               
               .dark .rbc-agenda-date-cell,
@@ -422,6 +553,19 @@ export default function ReservationsPage() {
               
               .dark .rbc-time-view {
                 border-color: #3f3f46 !important;
+              }
+              
+              .rbc-date-cell {
+                padding: 8px !important;
+                transition: all 0.2s ease !important;
+              }
+              
+              .rbc-date-cell:hover {
+                background-color: #f3f4f6 !important;
+              }
+              
+              .dark .rbc-date-cell:hover {
+                background-color: #27272a !important;
               }
               
               /* Griser les jours hors du mois affiché - Mode clair */
@@ -454,6 +598,7 @@ export default function ReservationsPage() {
               .dark .rbc-off-range-bg {
                 background-color: #0f0f0f !important;
                 opacity: 0.4 !important;
+                border-radius: 8px !important;
               }
               
               .dark .rbc-off-range {
@@ -508,9 +653,11 @@ export default function ReservationsPage() {
                       backgroundColor: isManualBlock ? '#f59e0b' : '#3b82f6',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '4px',
-                      padding: '2px 4px',
+                      padding: '4px 8px',
                       fontSize: '12px',
+                      fontWeight: '500',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
+                      transition: 'all 0.2s ease',
                     },
                   };
                 }}

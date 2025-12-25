@@ -71,5 +71,13 @@ export const calendarApi = {
   getReservations: async (calendarUrlId: string): Promise<Reservation[]> => {
     return api.get<Reservation[]>(`/reservations/calendar/${calendarUrlId}`);
   },
+
+  /**
+   * Récupère toutes les réservations
+   * @returns Liste de toutes les réservations
+   */
+  getAllReservations: async (): Promise<Reservation[]> => {
+    return api.get<Reservation[]>('/reservations');
+  },
 };
 

@@ -50,6 +50,16 @@ export const Navbar = () => {
               Annonces
             </Button>
           </NextLink>
+          <NextLink href="/reservations">
+            <Button variant="flat" size="sm">
+              Réservations
+            </Button>
+          </NextLink>
+          <NextLink href="/agenda">
+            <Button variant="flat" size="sm">
+              Planning
+            </Button>
+          </NextLink>
           <ThemeSwitch />
         </NavbarItem>
         <NavbarItem>
@@ -101,6 +111,28 @@ export const Navbar = () => {
               >
                 <Button variant="flat" className="w-full justify-start">
                   Annonces
+                </Button>
+              </NextLink>
+            </NavbarMenuItem>
+            <NavbarMenuItem>
+              <NextLink
+                href="/reservations"
+                className="w-full"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Button variant="flat" className="w-full justify-start">
+                  Réservations
+                </Button>
+              </NextLink>
+            </NavbarMenuItem>
+            <NavbarMenuItem>
+              <NextLink
+                href="/agenda"
+                className="w-full"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Button variant="flat" className="w-full justify-start">
+                  Planning
                 </Button>
               </NextLink>
             </NavbarMenuItem>

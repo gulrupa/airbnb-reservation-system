@@ -75,6 +75,8 @@ import {
     ReservationService,
     AirbnbCalendarService,
     CalendarUrlRepository,
+    CalendarSyncService,
+    EventProcessorService,
   ],
 })
 export class ReservationModule {}

@@ -13,6 +13,7 @@ import {
 } from 'nest-keycloak-connect';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { JobsController } from './jobs.controller';
 import { ReservationModule } from './reservation/presentation/reservation.module';
 import { AnnonceModule } from './annonce/presentation/annonce.module';
 import { EvenementModule } from './evenement/presentation/evenement.module';
@@ -47,7 +48,7 @@ import { EvenementModule } from './evenement/presentation/evenement.module';
     AnnonceModule,
     EvenementModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, JobsController],
   providers: [
     AppService,
     {

@@ -7,6 +7,7 @@ import { Tabs, Tab } from '@heroui/tabs';
 import { Spinner } from '@heroui/spinner';
 import { CalendarsSection } from '@/components/parametres/CalendarsSection';
 import { AnnoncesSection } from '@/components/parametres/AnnoncesSection';
+import { JobsSection } from '@/components/parametres/JobsSection';
 
 /**
  * Page de paramètres de l'application
@@ -14,6 +15,7 @@ import { AnnoncesSection } from '@/components/parametres/AnnoncesSection';
  * Cette page regroupe tous les paramètres de configuration de l'application :
  * - Calendriers : gestion des calendriers externes (Airbnb, Booking, etc.)
  * - Annonces : gestion des annonces et leurs associations avec les calendriers
+ * - Jobs : déclenchement manuel des jobs de synchronisation (calendriers, emails, événements)
  * 
  * Les paramètres sont organisés en onglets pour une navigation facile.
  */
@@ -83,6 +85,20 @@ export default function ParametresPage() {
           >
             <div className="mt-4 sm:mt-6">
               <AnnoncesSection />
+            </div>
+          </Tab>
+
+          <Tab 
+            key="jobs" 
+            title={
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline">⚙️</span>
+                <span>Jobs</span>
+              </div>
+            }
+          >
+            <div className="mt-4 sm:mt-6">
+              <JobsSection />
             </div>
           </Tab>
         </Tabs>

@@ -20,6 +20,7 @@ import {
   ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
+import { Roles } from 'nest-keycloak-connect';
 import { ReservationService } from '../../application/services/reservation.service';
 import { CreateReservationDto } from '../../application/dto/create-reservation.dto';
 import { UpdateReservationDto } from '../../application/dto/update-reservation.dto';
@@ -36,6 +37,7 @@ export class ReservationController {
   ) {}
 
   @Get()
+  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Récupérer toutes les réservations' })
   @ApiResponse({
@@ -48,6 +50,7 @@ export class ReservationController {
 
 
   @Post()
+  @Roles('admin')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Créer une nouvelle réservation' })
   @ApiBody({ type: CreateReservationDto })
@@ -62,6 +65,7 @@ export class ReservationController {
   }
 
   @Get('future')
+  @Roles('manager')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Récupérer les réservations à venir',
@@ -82,6 +86,7 @@ export class ReservationController {
   }
   
   @Get(':id')
+  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Récupérer une réservation par ID' })
   @ApiParam({ name: 'id', description: 'ID de la réservation' })
@@ -95,6 +100,7 @@ export class ReservationController {
   }
 
   @Put(':id')
+  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mettre à jour une réservation' })
   @ApiParam({ name: 'id', description: 'ID de la réservation' })
@@ -112,6 +118,7 @@ export class ReservationController {
   }
 
   @Delete(':id')
+  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Supprimer une réservation' })
   @ApiParam({ name: 'id', description: 'ID de la réservation' })
@@ -132,6 +139,7 @@ export class ReservationController {
   }
 
   @Get('user/:userId')
+  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Récupérer les réservations d\'un utilisateur' })
   @ApiParam({ name: 'userId', description: 'ID de l\'utilisateur' })
@@ -144,6 +152,7 @@ export class ReservationController {
   }
 
   @Get('property/:propertyId')
+  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Récupérer les réservations d\'une propriété' })
   @ApiParam({ name: 'propertyId', description: 'ID de la propriété' })
@@ -156,6 +165,7 @@ export class ReservationController {
   }
 
   @Get('date-range/start/:startDate/end/:endDate')
+  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Récupérer les réservations dans une plage de dates' })
   @ApiParam({ name: 'startDate', description: 'Date de début (ISO 8601)' })
@@ -175,6 +185,7 @@ export class ReservationController {
   }
 
   @Get('airbnb/calendar')
+  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   @ApiTags('airbnb')
   @ApiOperation({ summary: 'Récupérer les réservations depuis un calendrier Airbnb' })
@@ -192,6 +203,7 @@ export class ReservationController {
   }
 
   @Get('calendar/:calendarUrlId')
+  @Roles('admin')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Récupérer les réservations d\'un calendrier' })
   @ApiParam({ name: 'calendarUrlId', description: 'ID du calendrier' })

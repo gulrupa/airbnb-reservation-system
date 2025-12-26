@@ -10,6 +10,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+import { Roles } from 'nest-keycloak-connect';
 import { CalendarSyncService } from './reservation/application/services/calendar-sync.service';
 import { EmailSyncService } from './evenement/application/services/email-sync.service';
 import { EventProcessorService } from './reservation/application/services/event-processor.service';
@@ -17,6 +18,7 @@ import { StatistiquesService } from './statistiques/application/services/statist
 
 @ApiTags('jobs')
 @Controller('jobs')
+@Roles('admin')
 export class JobsController {
   private readonly logger = new Logger(JobsController.name);
 

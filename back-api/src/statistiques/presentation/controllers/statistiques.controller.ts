@@ -13,10 +13,12 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+import { Roles } from 'nest-keycloak-connect';
 import { StatistiquesService } from '../../application/services/statistiques.service';
 
 @ApiTags('statistiques')
 @Controller('statistiques')
+@Roles('admin')
 export class StatistiquesController {
   private readonly logger = new Logger(StatistiquesController.name);
 

@@ -63,15 +63,11 @@ export default function PlanningPage() {
       setLoading(true);
       setError(null);
 
-      const [reservationsData, calendarsData, annoncesData] = await Promise.all([
-        reservationApi.getFuture(),
-        calendarApi.getAll(),
-        annonceApi.getAll(),
+      const [reservationsData] = await Promise.all([
+        reservationApi.getFuture()
       ]);
 
       setReservations(reservationsData);
-      setCalendars(calendarsData);
-      setAnnonces(annoncesData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement des données');
     } finally {

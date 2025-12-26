@@ -19,6 +19,7 @@ import {
   ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
+import { Roles } from 'nest-keycloak-connect';
 import { CalendarUrlService } from '../../application/services/calendar-url.service';
 import { CalendarSyncService } from '../../application/services/calendar-sync.service';
 import { CreateCalendarUrlDto } from '../../application/dto/create-calendar-url.dto';
@@ -26,6 +27,7 @@ import { UpdateCalendarUrlDto } from '../../application/dto/update-calendar-url.
 
 @ApiTags('calendar-urls')
 @Controller('calendar-urls')
+@Roles('admin')
 export class CalendarUrlController {
   private readonly logger = new Logger(CalendarUrlController.name);
 

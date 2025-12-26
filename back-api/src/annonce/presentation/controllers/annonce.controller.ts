@@ -17,12 +17,14 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
+import { Roles } from 'nest-keycloak-connect';
 import { AnnonceService } from '../../application/services/annonce.service';
 import { CreateAnnonceDto } from '../../application/dto/create-annonce.dto';
 import { UpdateAnnonceDto } from '../../application/dto/update-annonce.dto';
 
 @ApiTags('annonces')
 @Controller('annonces')
+@Roles('admin')
 export class AnnonceController {
   private readonly logger = new Logger(AnnonceController.name);
 

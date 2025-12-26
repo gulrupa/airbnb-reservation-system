@@ -10,6 +10,7 @@ API NestJS pour la gestion des réservations et des calendriers Airbnb.
 - **Intégration Airbnb** : Récupération et parsing automatique des calendriers Airbnb
 - **Synchronisation des emails Airbnb** : Récupération automatique des emails Airbnb via IMAP et stockage des événements (versements, créations, annulations de réservations)
 - **Authentification Keycloak** : Protection de toutes les routes avec Keycloak via `nest-keycloak-connect`
+- **Gestion des rôles** : Contrôle d'accès basé sur les rôles (admin, manager)
 - **Validation des données** : Validation automatique avec support des dates au format `YYYY-MM-DD` ou ISO 8601
 - **Logging avancé** : Logging complet de toutes les requêtes et erreurs
 - **Documentation API** : Documentation Swagger/OpenAPI interactive
@@ -38,6 +39,118 @@ KEYCLOAK_REALM=gsi-booking
 KEYCLOAK_CLIENT_ID=app-admin
 CORS_ORIGIN=http://localhost:3001
 ```
+
+## 🔐 Configuration Keycloak et Rôles
+
+L'API utilise Keycloak pour l'authentification et l'autorisation basée sur les rôles. Deux rôles sont utilisés :
+
+- **`admin`** : Accès complet à tous les endpoints
+- **`manager`** : Accès limité à certains endpoints (ex: `GET /reservations/future`)
+
+### Configuration des rôles dans Keycloak
+
+#### 1. Créer les rôles dans le realm
+
+1. Connectez-vous à la console d'administration Keycloak
+2. Sélectionnez votre realm (par défaut : `gsi-booking`)
+3. Allez dans **Realm roles** (Rôles du realm)
+4. Cliquez sur **Create role** (Créer un rôle)
+5. Créez les deux rôles suivants :
+   - `admin`
+   - `manager`
+
+#### 2. Assigner les rôles aux utilisateurs
+
+1. Allez dans **Users** (Utilisateurs)
+2. Sélectionnez l'utilisateur à configurer
+3. Allez dans l'onglet **Role mapping** (Mappage des rôles)
+4. Cliquez sur **Assign role** (Assigner un rôle)
+5. Sélectionnez **Filter by realm roles** (Filtrer par rôles du realm)
+6. Cochez les rôles souhaités (`admin` ou `manager`)
+7. Cliquez sur **Assign** (Assigner)
+
+#### 3. Configurer le client pour mapper les rôles
+
+1. Allez dans **Clients** (Clients)
+2. Sélectionnez votre client (par défaut : `app-admin`)
+3. Allez dans l'onglet **Mappers** (Mappeurs)
+4. Vérifiez qu'il existe un mapper de type **User Realm Role** ou **Client Role**
+   - Si absent, créez-en un :
+     - **Name** : `realm-roles`
+     - **Mapper Type** : `User Realm Role`
+     - **Token Claim Name** : `realm_access.roles` (ou laissez par défaut)
+     - **Add to ID token** : `ON`
+     - **Add to access token** : `ON`
+     - **Add to userinfo** : `ON`
+
+#### 4. Vérifier la configuration
+
+Pour vérifier que les rôles sont correctement inclus dans le token JWT :
+
+1. Connectez-vous avec un utilisateur ayant un rôle assigné
+2. Récupérez le token JWT
+3. Décodez le token (via [jwt.io](https://jwt.io) ou un outil similaire)
+4. Vérifiez que le token contient les rôles dans `realm_access.roles` ou `resource_access.<client-id>.roles`
+
+### Endpoints et rôles requis
+
+| Endpoint | Méthode | Rôle requis |
+|----------|---------|-------------|
+| `/health` | GET | Public (aucun) |
+| `/` | GET | `admin` |
+| `/reservations/*` | Toutes | `admin` |
+| `/reservations/future` | GET | `manager` |
+| `/annonces/*` | Toutes | `admin` |
+| `/calendar-urls/*` | Toutes | `admin` |
+| `/statistiques/*` | Toutes | `admin` |
+| `/jobs/*` | Toutes | `admin` |
+
+### Test de l'authentification
+
+Pour tester l'authentification avec un rôle spécifique :
+
+1. **Obtenir un token** :
+   ```bash
+   curl -X POST "https://gul-si.fr/realms/gsi-booking/protocol/openid-connect/token" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "client_id=app-admin" \
+     -d "username=votre_utilisateur" \
+     -d "password=votre_mot_de_passe" \
+     -d "grant_type=password"
+   ```
+
+2. **Utiliser le token** :
+   ```bash
+   curl -X GET "http://localhost:3000/reservations" \
+     -H "Authorization: Bearer VOTRE_TOKEN_ICI"
+   ```
+
+3. **Tester avec le rôle manager** :
+   ```bash
+   # Devrait fonctionner
+   curl -X GET "http://localhost:3000/reservations/future" \
+     -H "Authorization: Bearer TOKEN_MANAGER"
+   
+   # Devrait échouer avec 403 Forbidden
+   curl -X GET "http://localhost:3000/reservations" \
+     -H "Authorization: Bearer TOKEN_MANAGER"
+   ```
+
+### Dépannage
+
+**Problème : Erreur 401 Unauthorized**
+- Vérifiez que le token est valide et non expiré
+- Vérifiez que `KEYCLOAK_URL`, `KEYCLOAK_REALM` et `KEYCLOAK_CLIENT_ID` sont correctement configurés
+
+**Problème : Erreur 403 Forbidden**
+- Vérifiez que l'utilisateur a le rôle requis assigné dans Keycloak
+- Vérifiez que le mapper de rôles est configuré dans le client Keycloak
+- Vérifiez que les rôles sont bien inclus dans le token JWT
+
+**Problème : Les rôles ne sont pas dans le token**
+- Vérifiez la configuration du mapper dans le client Keycloak
+- Assurez-vous que "Add to access token" est activé
+- Vérifiez que les rôles sont assignés au niveau du realm, pas du client
 
 ## 🏃 Démarrage
 
@@ -120,25 +233,26 @@ Voir [README.API.md](./README.API.md) pour plus de détails.
 Gestion complète des réservations avec support des dates et types (réservation, blocage manuel).
 
 **Endpoints principaux :**
-- `GET /reservations` : Liste toutes les réservations
-- `GET /reservations/:id` : Récupère une réservation par ID
-- `POST /reservations` : Crée une nouvelle réservation
-- `PUT /reservations/:id` : Met à jour une réservation
-- `DELETE /reservations/:id` : Supprime une réservation
-- `GET /reservations/user/:userId` : Récupère les réservations d'un utilisateur
-- `GET /reservations/property/:propertyId` : Récupère les réservations d'une propriété
-- `GET /reservations/date-range/start/:startDate/end/:endDate` : Récupère les réservations dans une plage de dates
+- `GET /reservations` : Liste toutes les réservations (rôle: `admin`)
+- `GET /reservations/future` : Récupère les réservations à venir (rôle: `manager`)
+- `GET /reservations/:id` : Récupère une réservation par ID (rôle: `admin`)
+- `POST /reservations` : Crée une nouvelle réservation (rôle: `admin`)
+- `PUT /reservations/:id` : Met à jour une réservation (rôle: `admin`)
+- `DELETE /reservations/:id` : Supprime une réservation (rôle: `admin`)
+- `GET /reservations/user/:userId` : Récupère les réservations d'un utilisateur (rôle: `admin`)
+- `GET /reservations/property/:propertyId` : Récupère les réservations d'une propriété (rôle: `admin`)
+- `GET /reservations/date-range/start/:startDate/end/:endDate` : Récupère les réservations dans une plage de dates (rôle: `admin`)
 
 ### Annonces (`/annonces`)
 
 Gestion des annonces avec association de calendriers par ID.
 
 **Endpoints principaux :**
-- `GET /annonces` : Liste toutes les annonces (avec calendriers associés)
-- `GET /annonces/:id` : Récupère une annonce par ID (avec calendriers associés)
-- `POST /annonces` : Crée une nouvelle annonce
-- `PUT /annonces/:id` : Met à jour une annonce
-- `DELETE /annonces/:id` : Supprime une annonce
+- `GET /annonces` : Liste toutes les annonces (avec calendriers associés) (rôle: `admin`)
+- `GET /annonces/:id` : Récupère une annonce par ID (avec calendriers associés) (rôle: `admin`)
+- `POST /annonces` : Crée une nouvelle annonce (rôle: `admin`)
+- `PUT /annonces/:id` : Met à jour une annonce (rôle: `admin`)
+- `DELETE /annonces/:id` : Supprime une annonce (rôle: `admin`)
 
 **Exemple de création d'annonce :**
 ```json
@@ -158,11 +272,11 @@ POST /annonces
 Gestion des URLs de calendrier iCal pour la synchronisation automatique.
 
 **Endpoints principaux :**
-- `GET /calendar-urls` : Liste toutes les URLs de calendrier
-- `GET /calendar-urls/:id` : Récupère une URL de calendrier par ID
-- `POST /calendar-urls` : Crée une nouvelle URL de calendrier
-- `PUT /calendar-urls/:id` : Met à jour une URL de calendrier
-- `DELETE /calendar-urls/:id` : Supprime une URL de calendrier
+- `GET /calendar-urls` : Liste toutes les URLs de calendrier (rôle: `admin`)
+- `GET /calendar-urls/:id` : Récupère une URL de calendrier par ID (rôle: `admin`)
+- `POST /calendar-urls` : Crée une nouvelle URL de calendrier (rôle: `admin`)
+- `PUT /calendar-urls/:id` : Met à jour une URL de calendrier (rôle: `admin`)
+- `DELETE /calendar-urls/:id` : Supprime une URL de calendrier (rôle: `admin`)
 
 ## 🏗️ Architecture
 

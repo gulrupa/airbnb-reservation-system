@@ -17,6 +17,7 @@ import 'moment/locale/fr';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { calendarApi } from '@/lib/calendar-api';
 import { annonceApi } from '@/lib/annonce-api';
+import { reservationApi } from '@/lib/reservation-api';
 import type { Reservation, CalendarUrl } from '@/types/calendar';
 import type { Annonce } from '@/types/annonce';
 
@@ -154,7 +155,7 @@ export default function ReservationsPage() {
       const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
 
       // Charger les réservations du mois
-      const monthReservations = await calendarApi.getReservationsByDateRange(
+      const monthReservations = await reservationApi.getByDateRange(
         startOfMonth.toISOString(),
         endOfMonth.toISOString(),
       );
@@ -281,7 +282,7 @@ export default function ReservationsPage() {
       setIsUpdating(true);
       setError(null);
 
-      await calendarApi.updateReservation(selectedReservation._id, editFormData);
+      await reservationApi.update(selectedReservation._id, editFormData);
 
       // Recharger les réservations du mois actuel
       const currentYear = currentDate.getFullYear();
@@ -305,7 +306,7 @@ export default function ReservationsPage() {
       // Recharger la réservation complète depuis le serveur
       const startOfMonth = new Date(currentYear, currentMonth, 1);
       const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
-      const updatedReservations = await calendarApi.getReservationsByDateRange(
+      const updatedReservations = await reservationApi.getByDateRange(
         startOfMonth.toISOString(),
         endOfMonth.toISOString(),
       );
@@ -335,7 +336,7 @@ export default function ReservationsPage() {
       setIsDeleting(true);
       setError(null);
 
-      await calendarApi.deleteReservation(selectedReservation._id);
+      await reservationApi.delete(selectedReservation._id);
 
       // Retirer la réservation supprimée de la liste
       setReservations((prev) => prev.filter((r) => r._id !== selectedReservation._id));
@@ -633,6 +634,33 @@ export default function ReservationsPage() {
                 border-radius: 0 !important;
                 background-color: #f9fafb !important;
                 border-bottom: 1px solid #e5e7eb !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+              }
+              
+              /* Styles pour mobile - toolbar responsive */
+              @media (max-width: 640px) {
+                .rbc-toolbar {
+                  padding: 8px 4px !important;
+                  gap: 4px !important;
+                }
+                
+                .rbc-toolbar button {
+                  font-size: 12px !important;
+                  padding: 6px 8px !important;
+                  min-width: auto !important;
+                  flex: 1 1 auto !important;
+                  max-width: calc(33.333% - 4px) !important;
+                }
+                
+                .rbc-toolbar-label {
+                  font-size: 14px !important;
+                  padding: 0 4px !important;
+                  flex: 1 1 100% !important;
+                  text-align: center !important;
+                  order: -1 !important;
+                  margin-bottom: 8px !important;
+                }
               }
               
               .dark .rbc-toolbar {
@@ -657,6 +685,14 @@ export default function ReservationsPage() {
                 color: #ffffff !important;
                 border-color: #9333ea !important;
                 box-shadow: 0 2px 4px rgba(147, 51, 234, 0.3) !important;
+              }
+              
+              /* Styles mobile pour dark mode */
+              @media (max-width: 640px) {
+                .dark .rbc-toolbar button {
+                  font-size: 12px !important;
+                  padding: 6px 8px !important;
+                }
               }
               
               .dark .rbc-time-slot {
@@ -1018,7 +1054,7 @@ export default function ReservationsPage() {
                         color="primary"
                         variant="flat"
                         onPress={handleEdit}
-                        className="flex-1"
+                        className="flex-1 min-h-[36px]"
                       >
                         Modifier
                       </Button>
@@ -1028,13 +1064,18 @@ export default function ReservationsPage() {
                         onPress={handleDelete}
                         isDisabled={isDeleting}
                         isLoading={isDeleting}
-                        className="flex-1"
+                        className="flex-1 min-h-[36px]"
                       >
                         {isDeleting ? 'Suppression...' : 'Supprimer'}
                       </Button>
                     </>
                   )}
-                  <Button color="default" variant="light" onPress={onClose} className="flex-1">
+                  <Button 
+                    color="default" 
+                    variant="light" 
+                    onPress={onClose} 
+                    className="flex-1 min-h-[36px]"
+                  >
                     Fermer
                   </Button>
                 </div>

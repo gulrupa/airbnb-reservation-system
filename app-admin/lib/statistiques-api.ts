@@ -1,5 +1,4 @@
 import { api } from './api';
-import type { Reservation } from '@/types/calendar';
 
 /**
  * Interface pour les statistiques annuelles
@@ -45,15 +44,6 @@ export interface StatistiquesResponse {
 }
 
 /**
- * Réponse de l'API pour les réservations
- */
-export interface ReservationsResponse {
-  message: string;
-  data: Reservation[];
-  count: number;
-}
-
-/**
  * Service API pour les statistiques
  */
 export const statistiquesApi = {
@@ -93,33 +83,5 @@ export const statistiquesApi = {
     return response.data;
   },
 
-  /**
-   * Récupère les réservations du mois en cours
-   * @returns Liste des réservations du mois en cours
-   */
-  getCurrentMonthReservations: async (): Promise<Reservation[]> => {
-    const response = await api.get<ReservationsResponse>('/statistiques/reservations/current-month');
-    return response.data;
-  },
-
-  /**
-   * Récupère les réservations d'un mois et d'une année spécifiques
-   * @param year Année
-   * @param month Mois (0-11)
-   * @returns Liste des réservations du mois
-   */
-  getMonthReservations: async (year: number, month: number): Promise<Reservation[]> => {
-    const response = await api.get<ReservationsResponse>(`/statistiques/reservations/month/${year}/${month}`);
-    return response.data;
-  },
-
-  /**
-   * Récupère les réservations à venir
-   * @returns Liste des réservations futures
-   */
-  getFutureReservations: async (): Promise<Reservation[]> => {
-    const response = await api.get<ReservationsResponse>('/statistiques/reservations/future');
-    return response.data;
-  },
 };
 

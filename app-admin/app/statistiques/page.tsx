@@ -10,6 +10,7 @@ import { Button } from '@heroui/button';
 import { Chip } from '@heroui/chip';
 import { Select, SelectItem } from '@heroui/select';
 import { statistiquesApi, type Statistiques, type StatistiquesMensuelles } from '@/lib/statistiques-api';
+import { reservationApi } from '@/lib/reservation-api';
 import type { Reservation } from '@/types/calendar';
 
 /**
@@ -185,7 +186,7 @@ export default function StatistiquesPage() {
   const handleOpenMonthReservations = async () => {
     try {
       setLoadingReservations(true);
-      const monthReservations = await statistiquesApi.getMonthReservations(selectedYear, selectedMonth);
+      const monthReservations = await reservationApi.getByMonth(selectedYear, selectedMonth);
       setModalReservations(monthReservations);
       setModalTitle(`Réservations de ${monthNames[selectedMonth]} ${selectedYear} (${monthReservations.length})`);
       onOpen();
@@ -199,7 +200,7 @@ export default function StatistiquesPage() {
   const handleOpenFutureReservations = async () => {
     try {
       setLoadingReservations(true);
-      const futureReservations = await statistiquesApi.getFutureReservations();
+      const futureReservations = await reservationApi.getFuture();
       setModalReservations(futureReservations);
       setModalTitle(`Réservations à venir (${futureReservations.length})`);
       onOpen();

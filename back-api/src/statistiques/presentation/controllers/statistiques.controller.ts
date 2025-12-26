@@ -137,25 +137,5 @@ export class StatistiquesController {
       count: reservations.length,
     };
   }
-
-  @Get('reservations/future')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Récupérer les réservations à venir',
-    description: 'Retourne toutes les réservations valides futures (après aujourd\'hui)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Réservations futures récupérées avec succès',
-  })
-  async getFutureReservations() {
-    this.logger.log('Récupération des réservations à venir');
-    const reservations = await this.statistiquesService.getFutureReservations();
-    return {
-      message: 'Réservations futures récupérées avec succès',
-      data: reservations,
-      count: reservations.length,
-    };
-  }
 }
 

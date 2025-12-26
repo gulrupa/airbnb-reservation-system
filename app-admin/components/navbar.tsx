@@ -45,7 +45,7 @@ export const Navbar = () => {
               Réservations
             </Button>
           </NextLink>
-          <NextLink href="/agenda">
+          <NextLink href="/planning">
             <Button variant="flat" size="sm">
               Planning
             </Button>
@@ -105,7 +105,7 @@ export const Navbar = () => {
             </NavbarMenuItem>
             <NavbarMenuItem>
               <NextLink
-                href="/agenda"
+                href="/planning"
                 className="w-full"
                 onClick={() => setIsMenuOpen(false)}
               >

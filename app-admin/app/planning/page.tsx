@@ -10,6 +10,7 @@ import moment from 'moment';
 import 'moment/locale/fr';
 import { calendarApi } from '@/lib/calendar-api';
 import { annonceApi } from '@/lib/annonce-api';
+import { reservationApi } from '@/lib/reservation-api';
 import type { Reservation, CalendarUrl } from '@/types/calendar';
 import type { Annonce } from '@/types/annonce';
 
@@ -28,7 +29,7 @@ interface ReservationWithAnnonce extends Reservation {
  * Page de planning avec liste des réservations
  * Affiche les réservations à partir d'aujourd'hui avec les délais entre elles
  */
-export default function AgendaPage() {
+export default function PlanningPage() {
   // État d'authentification
   const { authenticated, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -63,7 +64,7 @@ export default function AgendaPage() {
       setError(null);
 
       const [reservationsData, calendarsData, annoncesData] = await Promise.all([
-        calendarApi.getAllReservations(),
+        reservationApi.getFuture(),
         calendarApi.getAll(),
         annonceApi.getAll(),
       ]);

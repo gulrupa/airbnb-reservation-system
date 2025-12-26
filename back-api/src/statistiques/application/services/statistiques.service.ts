@@ -450,12 +450,5 @@ export class StatistiquesService implements OnModuleInit {
       endOfMonth,
     );
   }
-
-  async getFutureReservations() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return this.reservationRepository.findValidReservationsAfterDate(today);
-  }
 }
 

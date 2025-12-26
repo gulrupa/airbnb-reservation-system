@@ -137,6 +137,13 @@ export class ReservationService {
     return this.reservationRepository.findByCalendarUrlId(calendarUrlId);
   }
 
+  async getFutureReservations(): Promise<ReservationDocument[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return this.reservationRepository.findValidReservationsAfterDate(today);
+  }
+
   /**
    * Valide que les dates sont cohérentes
    * @param startDate Date de début

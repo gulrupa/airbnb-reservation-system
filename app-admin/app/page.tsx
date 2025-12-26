@@ -8,7 +8,7 @@ import { Spinner } from '@heroui/spinner';
 import { Chip } from '@heroui/chip';
 import { Divider } from '@heroui/divider';
 import { title, subtitle } from '@/components/primitives';
-import { calendarApi } from '@/lib/calendar-api';
+import { reservationApi } from '@/lib/reservation-api';
 import type { Reservation } from '@/types/calendar';
 
 export default function Home() {
@@ -32,30 +32,16 @@ export default function Home() {
   const loadReservations = async () => {
     try {
       setLoadingReservations(true);
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
       
-      // Charger les réservations du mois en cours et du mois suivant
-      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      const endOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 2, 0, 23, 59, 59);
-      
-      const [currentMonthReservations, nextMonthReservations] = await Promise.all([
-        calendarApi.getReservationsByDateRange(startOfMonth.toISOString(), endOfMonth.toISOString()),
-        calendarApi.getReservationsByDateRange(nextMonth.toISOString(), endOfNextMonth.toISOString()),
-      ]);
+      // Charger uniquement les réservations futures
+      const futureReservations = await reservationApi.getFuture();
 
       // Filtrer uniquement les réservations valides (pas les blocages manuels)
-      const allReservations = [...currentMonthReservations, ...nextMonthReservations].filter(
+      const validReservations = futureReservations.filter(
         (r) => r.type !== 'manual_block_date'
       );
 
-      // Éliminer les doublons
-      const uniqueReservations = Array.from(
-        new Map(allReservations.map((r) => [r._id, r])).values()
-      );
-
-      setReservations(uniqueReservations);
+      setReservations(validReservations);
     } catch (err) {
       console.error('Erreur lors du chargement des réservations:', err);
     } finally {

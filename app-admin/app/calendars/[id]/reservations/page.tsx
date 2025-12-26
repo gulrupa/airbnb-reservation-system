@@ -9,6 +9,7 @@ import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from 
 import { Chip } from '@heroui/chip';
 import { Spinner } from '@heroui/spinner';
 import { calendarApi } from '@/lib/calendar-api';
+import { reservationApi } from '@/lib/reservation-api';
 import type { Reservation, CalendarUrl } from '@/types/calendar';
 
 /**
@@ -70,7 +71,7 @@ export default function CalendarReservationsPage() {
       // Chargement en parallèle du calendrier et de ses réservations
       const [calendarData, reservationsData] = await Promise.all([
         calendarApi.getById(calendarId),
-        calendarApi.getReservations(calendarId),
+        reservationApi.getByCalendarId(calendarId),
       ]);
 
       setCalendar(calendarData);

@@ -46,18 +46,6 @@ export class ReservationController {
     return this.reservationService.getAllReservations();
   }
 
-  @Get(':id')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Récupérer une réservation par ID' })
-  @ApiParam({ name: 'id', description: 'ID de la réservation' })
-  @ApiResponse({
-    status: 200,
-    description: 'Réservation trouvée',
-  })
-  @ApiResponse({ status: 404, description: 'Réservation non trouvée' })
-  async getReservationById(@Param('id') id: string) {
-    return this.reservationService.getReservationById(id);
-  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -71,6 +59,39 @@ export class ReservationController {
   @ApiResponse({ status: 409, description: 'Réservation avec cet externalId existe déjà' })
   async createReservation(@Body() createReservationDto: CreateReservationDto) {
     return this.reservationService.createReservation(createReservationDto);
+  }
+
+  @Get('future')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Récupérer les réservations à venir',
+    description: 'Retourne toutes les réservations valides futures (après aujourd\'hui)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Réservations futures récupérées avec succès',
+  })
+  async getFutureReservations() {
+    this.logger.log('Récupération des réservations à venir');
+    const reservations = await this.reservationService.getFutureReservations();
+    return {
+      message: 'Réservations futures récupérées avec succès',
+      data: reservations,
+      count: reservations.length,
+    };
+  }
+  
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Récupérer une réservation par ID' })
+  @ApiParam({ name: 'id', description: 'ID de la réservation' })
+  @ApiResponse({
+    status: 200,
+    description: 'Réservation trouvée',
+  })
+  @ApiResponse({ status: 404, description: 'Réservation non trouvée' })
+  async getReservationById(@Param('id') id: string) {
+    return this.reservationService.getReservationById(id);
   }
 
   @Put(':id')

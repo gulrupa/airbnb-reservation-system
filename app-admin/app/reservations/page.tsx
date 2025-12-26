@@ -10,6 +10,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 import { Select, SelectItem } from '@heroui/select';
 import { Checkbox } from '@heroui/checkbox';
 import { Spinner } from '@heroui/spinner';
+import { Input } from '@heroui/input';
 import { Calendar, momentLocalizer, Event } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/fr';
@@ -62,6 +63,21 @@ export default function ReservationsPage() {
     onClose: onDetailClose,
   } = useDisclosure();
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+
+  // Modal pour modifier une réservation
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
+  } = useDisclosure();
+  const [editFormData, setEditFormData] = useState<{
+    price?: number;
+    startDate?: string;
+    endDate?: string;
+    numberOfTravelers?: number;
+  }>({});
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Modal pour afficher les événements supplémentaires (quand on clique sur "+X more")
   const {
@@ -184,6 +200,80 @@ export default function ReservationsPage() {
   const handleSelectEvent = (event: CalendarEvent) => {
     setSelectedReservation(event.reservation);
     onDetailOpen();
+  };
+
+  /**
+   * Ouvre la modal de modification avec les données de la réservation
+   */
+  const handleEdit = () => {
+    if (selectedReservation) {
+      setEditFormData({
+        price: selectedReservation.price,
+        startDate: selectedReservation.startDate.split('T')[0],
+        endDate: selectedReservation.endDate.split('T')[0],
+        numberOfTravelers: selectedReservation.numberOfTravelers,
+      });
+      onDetailClose();
+      onEditOpen();
+    }
+  };
+
+  /**
+   * Sauvegarde les modifications de la réservation
+   */
+  const handleSaveEdit = async () => {
+    if (!selectedReservation) return;
+
+    try {
+      setIsUpdating(true);
+      setError(null);
+
+      await calendarApi.updateReservation(selectedReservation._id, editFormData);
+
+      // Recharger les données
+      await loadData();
+
+      // Fermer la modal et rouvrir les détails avec la réservation mise à jour
+      onEditClose();
+      const updatedReservations = await calendarApi.getAllReservations();
+      const updated = updatedReservations.find((r) => r._id === selectedReservation._id);
+      if (updated) {
+        setSelectedReservation(updated);
+        onDetailOpen();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la modification');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  /**
+   * Supprime la réservation
+   */
+  const handleDelete = async () => {
+    if (!selectedReservation) return;
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      setError(null);
+
+      await calendarApi.deleteReservation(selectedReservation._id);
+
+      // Recharger les données
+      await loadData();
+
+      // Fermer les modals
+      onDetailClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la suppression');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   /**
@@ -824,9 +914,110 @@ export default function ReservationsPage() {
                 )}
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Fermer
-                </Button>
+                <div className="flex gap-2 w-full flex-col sm:flex-row">
+                  {selectedReservation?.type !== 'manual_block_date' && (
+                    <>
+                      <Button
+                        color="primary"
+                        variant="flat"
+                        onPress={handleEdit}
+                        className="flex-1"
+                      >
+                        Modifier
+                      </Button>
+                      <Button
+                        color="danger"
+                        variant="flat"
+                        onPress={handleDelete}
+                        isDisabled={isDeleting}
+                        isLoading={isDeleting}
+                        className="flex-1"
+                      >
+                        {isDeleting ? 'Suppression...' : 'Supprimer'}
+                      </Button>
+                    </>
+                  )}
+                  <Button color="default" variant="light" onPress={onClose} className="flex-1">
+                    Fermer
+                  </Button>
+                </div>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* Modal de modification */}
+      <Modal isOpen={isEditOpen} onClose={onEditClose} size="2xl" scrollBehavior="inside">
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                <h2 className="text-xl font-bold">Modifier la réservation</h2>
+              </ModalHeader>
+              <ModalBody>
+                <div className="space-y-4">
+                  <Input
+                    type="number"
+                    label="Prix"
+                    placeholder="Prix en euros"
+                    value={editFormData.price?.toString() || ''}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        price: e.target.value ? parseFloat(e.target.value) : undefined,
+                      })
+                    }
+                    startContent={<span className="text-default-400">€</span>}
+                  />
+
+                  <Input
+                    type="date"
+                    label="Date de début"
+                    value={editFormData.startDate || ''}
+                    onChange={(e) =>
+                      setEditFormData({ ...editFormData, startDate: e.target.value })
+                    }
+                  />
+
+                  <Input
+                    type="date"
+                    label="Date de fin"
+                    value={editFormData.endDate || ''}
+                    onChange={(e) =>
+                      setEditFormData({ ...editFormData, endDate: e.target.value })
+                    }
+                  />
+
+                  <Input
+                    type="number"
+                    label="Nombre de voyageurs"
+                    min="1"
+                    value={editFormData.numberOfTravelers?.toString() || ''}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        numberOfTravelers: e.target.value ? parseInt(e.target.value, 10) : undefined,
+                      })
+                    }
+                  />
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <div className="flex gap-2 w-full">
+                  <Button color="danger" variant="light" onPress={onClose} className="flex-1">
+                    Annuler
+                  </Button>
+                  <Button
+                    color="primary"
+                    onPress={handleSaveEdit}
+                    isDisabled={isUpdating}
+                    isLoading={isUpdating}
+                    className="flex-1"
+                  >
+                    {isUpdating ? 'Enregistrement...' : 'Enregistrer'}
+                  </Button>
+                </div>
               </ModalFooter>
             </>
           )}

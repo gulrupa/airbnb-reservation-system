@@ -170,11 +170,34 @@ export class StatistiquesService implements OnModuleInit {
       1;
     const occupancyRate = (reservedDays.size / totalDays) * 100;
 
-    // Nombre de réservations du mois
-    const currentMonthReservations = validReservations.filter((r) => {
+    // Taux de remplissage du mois en cours (jours réservés / jours disponibles dans le mois)
+    const monthReservedDays = new Set<string>();
+    validReservations.forEach((r) => {
+      const start = new Date(r.startDate);
+      const end = new Date(r.endDate);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
+      let current = new Date(start);
+      while (current < end) {
+        if (current >= startOfMonth && current <= endOfMonth) {
+          monthReservedDays.add(current.toISOString().split('T')[0]);
+        }
+        current.setDate(current.getDate() + 1);
+      }
+    });
+
+    const monthTotalDays =
+      Math.ceil((endOfMonth.getTime() - startOfMonth.getTime()) / (1000 * 60 * 60 * 24)) +
+      1;
+    const currentMonthOccupancyRate = (monthReservedDays.size / monthTotalDays) * 100;
+
+    // Réservations du mois
+    const currentMonthReservationsList = validReservations.filter((r) => {
       const startDate = new Date(r.startDate);
       return startDate >= startOfMonth && startDate <= endOfMonth;
-    }).length;
+    });
+    const currentMonthReservations = currentMonthReservationsList.length;
 
     // Revenu moyen par réservation
     const averageRevenuePerReservation =
@@ -186,6 +209,7 @@ export class StatistiquesService implements OnModuleInit {
     // Revenu moyen par nuit et nombre total de nuits
     let totalRevenue = 0;
     let totalNights = 0;
+    let totalReservationDurations = 0;
 
     validReservations.forEach((r) => {
       const start = new Date(r.startDate);
@@ -195,9 +219,39 @@ export class StatistiquesService implements OnModuleInit {
       );
       totalRevenue += r.price;
       totalNights += nights;
+      totalReservationDurations += nights;
     });
 
     const averageRevenuePerNight = totalNights > 0 ? totalRevenue / totalNights : 0;
+    const averageReservationDuration =
+      validReservations.length > 0
+        ? totalReservationDurations / validReservations.length
+        : 0;
+
+    // Statistiques du mois en cours
+    let currentMonthTotalRevenue = 0;
+    let currentMonthTotalNights = 0;
+    let currentMonthTotalDurations = 0;
+
+    currentMonthReservationsList.forEach((r) => {
+      const start = new Date(r.startDate);
+      const end = new Date(r.endDate);
+      const nights = Math.ceil(
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      currentMonthTotalRevenue += r.price;
+      currentMonthTotalNights += nights;
+      currentMonthTotalDurations += nights;
+    });
+
+    const currentMonthAveragePricePerNight =
+      currentMonthTotalNights > 0
+        ? currentMonthTotalRevenue / currentMonthTotalNights
+        : 0;
+    const currentMonthAverageReservationDuration =
+      currentMonthReservations > 0
+        ? currentMonthTotalDurations / currentMonthReservations
+        : 0;
 
     // Sauvegarder les statistiques
     const calculatedAt = new Date();
@@ -211,9 +265,13 @@ export class StatistiquesService implements OnModuleInit {
       futureRevenue,
       yearRevenue,
       occupancyRate,
+      currentMonthOccupancyRate,
       currentMonthReservations,
       averageRevenuePerReservation,
       averageRevenuePerNight,
+      averageReservationDuration,
+      currentMonthAveragePricePerNight,
+      currentMonthAverageReservationDuration,
       totalNights,
       monthlyRevenue,
       calculatedAt,

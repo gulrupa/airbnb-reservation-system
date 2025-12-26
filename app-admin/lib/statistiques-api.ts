@@ -9,9 +9,13 @@ export interface Statistiques {
   futureRevenue: number;
   yearRevenue: number;
   occupancyRate: number;
+  currentMonthOccupancyRate: number;
   currentMonthReservations: number;
   averageRevenuePerReservation: number;
   averageRevenuePerNight: number;
+  averageReservationDuration: number;
+  currentMonthAveragePricePerNight: number;
+  currentMonthAverageReservationDuration: number;
   totalNights: number;
   monthlyRevenue: Array<{ month: string; revenue: number }>;
   calculatedAt: string;

@@ -18,6 +18,9 @@ export class Statistiques {
   occupancyRate: number;
 
   @Prop({ required: true, type: Number })
+  currentMonthOccupancyRate: number;
+
+  @Prop({ required: true, type: Number })
   currentMonthReservations: number;
 
   @Prop({ required: true, type: Number })
@@ -25,6 +28,15 @@ export class Statistiques {
 
   @Prop({ required: true, type: Number })
   averageRevenuePerNight: number;
+
+  @Prop({ required: true, type: Number })
+  averageReservationDuration: number;
+
+  @Prop({ required: true, type: Number })
+  currentMonthAveragePricePerNight: number;
+
+  @Prop({ required: true, type: Number })
+  currentMonthAverageReservationDuration: number;
 
   @Prop({ required: true, type: Number })
   totalNights: number;

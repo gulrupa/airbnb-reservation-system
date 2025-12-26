@@ -88,7 +88,7 @@ export class ReservationRepository {
   }
 
   async findByCalendarUrlId(calendarUrlId: string): Promise<ReservationDocument[]> {
-    return this.reservationModel.find({ calendarUrlId }).exec();
+    return this.reservationModel.find({ calendarUrlId }).sort({ startDate: -1 }).exec();
   }
 
   /**
@@ -105,10 +105,9 @@ export class ReservationRepository {
     return this.reservationModel
       .find({
         type: { $ne: 'manual_block_date' },
-        price: { $gt: 0 },
         startDate: { $gte: startDate, $lte: endDate },
       })
-      .sort({ startDate: 1 })
+      .sort({ startDate: -1 })
       .lean()
       .exec();
   }
@@ -123,10 +122,9 @@ export class ReservationRepository {
     return this.reservationModel
       .find({
         type: { $ne: 'manual_block_date' },
-        price: { $gt: 0 },
         startDate: { $gt: afterDate },
       })
-      .sort({ startDate: 1 })
+      .sort({ startDate: -1 })
       .lean()
       .exec();
   }

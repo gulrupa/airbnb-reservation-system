@@ -79,5 +79,23 @@ export const calendarApi = {
   getAllReservations: async (): Promise<Reservation[]> => {
     return api.get<Reservation[]>('/reservations');
   },
+
+  /**
+   * Met à jour une réservation
+   * @param id - ID MongoDB de la réservation
+   * @param data - Données partielles à mettre à jour
+   * @returns La réservation mise à jour
+   */
+  updateReservation: async (id: string, data: Partial<Reservation>): Promise<Reservation> => {
+    return api.put<Reservation>(`/reservations/${id}`, data);
+  },
+
+  /**
+   * Supprime une réservation
+   * @param id - ID MongoDB de la réservation
+   */
+  deleteReservation: async (id: string): Promise<void> => {
+    return api.delete<void>(`/reservations/${id}`);
+  },
 };
 

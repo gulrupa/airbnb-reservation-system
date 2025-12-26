@@ -212,6 +212,18 @@ export default function StatistiquesPage() {
 
           <Card>
             <CardHeader className="pb-2">
+              <h2 className="text-base font-semibold">Taux de remplissage du mois</h2>
+            </CardHeader>
+            <CardBody>
+              <p className="text-2xl sm:text-3xl font-bold text-warning">
+                {statistiques.currentMonthOccupancyRate.toFixed(1)}%
+              </p>
+              <p className="text-sm text-default-500 mt-1">Mois en cours</p>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
               <h2 className="text-base font-semibold">Revenu moyen</h2>
             </CardHeader>
             <CardBody>
@@ -230,7 +242,45 @@ export default function StatistiquesPage() {
               <p className="text-2xl sm:text-3xl font-bold text-default-700">
                 {formatCurrency(statistiques.averageRevenuePerNight)}
               </p>
-              <p className="text-sm text-default-500 mt-1">Par nuit</p>
+              <p className="text-sm text-default-500 mt-1">Par nuit (global)</p>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <h2 className="text-base font-semibold">Prix moyen par nuit du mois</h2>
+            </CardHeader>
+            <CardBody>
+              <p className="text-2xl sm:text-3xl font-bold text-primary">
+                {formatCurrency(statistiques.currentMonthAveragePricePerNight)}
+              </p>
+              <p className="text-sm text-default-500 mt-1">Mois en cours</p>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <h2 className="text-base font-semibold">Durée moyenne réservation</h2>
+            </CardHeader>
+            <CardBody>
+              <p className="text-2xl sm:text-3xl font-bold text-default-700">
+                {statistiques.averageReservationDuration.toFixed(1)} nuit
+                {statistiques.averageReservationDuration > 1 ? 's' : ''}
+              </p>
+              <p className="text-sm text-default-500 mt-1">Global</p>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <h2 className="text-base font-semibold">Durée moyenne du mois</h2>
+            </CardHeader>
+            <CardBody>
+              <p className="text-2xl sm:text-3xl font-bold text-primary">
+                {statistiques.currentMonthAverageReservationDuration.toFixed(1)} nuit
+                {statistiques.currentMonthAverageReservationDuration > 1 ? 's' : ''}
+              </p>
+              <p className="text-sm text-default-500 mt-1">Mois en cours</p>
             </CardBody>
           </Card>
 

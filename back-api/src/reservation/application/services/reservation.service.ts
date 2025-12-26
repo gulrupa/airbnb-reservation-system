@@ -183,6 +183,15 @@ export class ReservationService {
         : `Réservation ${reservation.externalId}`;
       vevent.updatePropertyWithValue('summary', summary);
       
+      // URL cliquable (sera rendue cliquable dans les applications de calendrier)
+      // Le champ URL est automatiquement rendu cliquable par la plupart des applications de calendrier
+      const apiUrl = process.env.API_URL || 'https://api.booking.gul-si.fr';
+      vevent.updatePropertyWithValue('url', apiUrl);
+      
+
+      let description = `\n\nVoir les détails: ${apiUrl}`;
+      vevent.updatePropertyWithValue('description', description);
+      
       // Statut de l'événement
       if (reservation.status === 'canceled') {
         vevent.updatePropertyWithValue('status', 'CANCELLED');

@@ -54,10 +54,13 @@ export class Statistiques {
 
   @Prop({ required: true, type: Date })
   calculatedAt: Date;
+
+  @Prop({ required: true, type: Number, index: true })
+  year: number;
 }
 
 export const StatistiquesSchema = SchemaFactory.createForClass(Statistiques);
 
-// Index unique pour s'assurer qu'il n'y a qu'une seule statistique par jour
-StatistiquesSchema.index({ calculatedAt: 1 }, { unique: true });
+// Index unique pour s'assurer qu'il n'y a qu'une seule statistique par année
+StatistiquesSchema.index({ year: 1 }, { unique: true });
 

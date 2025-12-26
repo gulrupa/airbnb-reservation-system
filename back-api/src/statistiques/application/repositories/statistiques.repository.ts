@@ -13,8 +13,13 @@ export class StatistiquesRepository {
     private statistiquesModel: Model<StatistiquesDocument>,
   ) {}
 
+  async findByYear(year: number): Promise<StatistiquesDocument | null> {
+    return this.statistiquesModel.findOne({ year }).exec();
+  }
+
   async findLatest(): Promise<StatistiquesDocument | null> {
-    return this.statistiquesModel.findOne().sort({ calculatedAt: -1 }).exec();
+    const currentYear = new Date().getFullYear();
+    return this.findByYear(currentYear);
   }
 
   async create(data: Partial<Statistiques>): Promise<StatistiquesDocument> {
@@ -22,26 +27,15 @@ export class StatistiquesRepository {
     return statistiques.save();
   }
 
-  async deleteByDate(date: Date): Promise<boolean> {
-    const normalizedDate = new Date(date);
-    normalizedDate.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(normalizedDate);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const result = await this.statistiquesModel
-      .deleteMany({
-        calculatedAt: { $gte: normalizedDate, $lt: tomorrow },
-      })
+  async updateByYear(year: number, data: Partial<Statistiques>): Promise<StatistiquesDocument | null> {
+    return this.statistiquesModel
+      .findOneAndUpdate({ year }, { ...data, calculatedAt: new Date() }, { new: true, upsert: true })
       .exec();
-    return (result.deletedCount || 0) > 0;
   }
 
-  async deleteOld(keepDays: number = 90): Promise<number> {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - keepDays);
-    const result = await this.statistiquesModel
-      .deleteMany({ calculatedAt: { $lt: cutoffDate } })
-      .exec();
-    return result.deletedCount || 0;
+  async findAllYears(): Promise<number[]> {
+    const stats = await this.statistiquesModel.find({}, { year: 1 }).exec();
+    return stats.map((s) => s.year).sort();
   }
 }
 

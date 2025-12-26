@@ -75,7 +75,7 @@ export function JobsSection() {
           )}
 
           {/* Job: Synchronisation des calendriers */}
-          <div className="p-4 border rounded-lg">
+          <div className="p-4 border border-default-200 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div>
                 <h3 className="font-semibold text-base sm:text-lg">Synchronisation des calendriers</h3>
@@ -108,7 +108,7 @@ export function JobsSection() {
           </div>
 
           {/* Job: Synchronisation des emails */}
-          <div className="p-4 border rounded-lg">
+          <div className="p-4 border border-default-200 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div>
                 <h3 className="font-semibold text-base sm:text-lg">Synchronisation des emails Airbnb</h3>
@@ -141,7 +141,7 @@ export function JobsSection() {
           </div>
 
           {/* Job: Traitement des événements */}
-          <div className="p-4 border rounded-lg">
+          <div className="p-4 border border-default-200 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div>
                 <h3 className="font-semibold text-base sm:text-lg">Traitement des événements</h3>
@@ -174,7 +174,7 @@ export function JobsSection() {
           </div>
 
           {/* Job: Calcul des statistiques */}
-          <div className="p-4 border rounded-lg">
+          <div className="p-4 border border-default-200 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <div>
                 <h3 className="font-semibold text-base sm:text-lg">Calcul des statistiques</h3>

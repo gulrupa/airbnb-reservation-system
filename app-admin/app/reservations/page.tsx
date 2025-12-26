@@ -48,6 +48,8 @@ export default function ReservationsPage() {
   const [annonces, setAnnonces] = useState<Annonce[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
+  const [loadingReservations, setLoadingReservations] = useState(false);
 
   // États pour les filtres
   const [selectedAnnonceId, setSelectedAnnonceId] = useState<string>('all');
@@ -98,31 +100,82 @@ export default function ReservationsPage() {
   // Chargement des données une fois authentifié
   useEffect(() => {
     if (authenticated) {
-      loadData();
+      loadInitialData();
     }
   }, [authenticated]);
 
+  // Charger les réservations du mois en cours au démarrage
+  useEffect(() => {
+    if (authenticated && calendars.length > 0) {
+      loadReservationsForMonth(new Date());
+    }
+  }, [authenticated, calendars]);
+
   /**
-   * Charge toutes les données nécessaires
+   * Charge les données initiales (calendriers et annonces)
    */
-  const loadData = async () => {
+  const loadInitialData = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const [reservationsData, calendarsData, annoncesData] = await Promise.all([
-        calendarApi.getAllReservations(),
+      const [calendarsData, annoncesData] = await Promise.all([
         calendarApi.getAll(),
         annonceApi.getAll(),
       ]);
 
-      setReservations(reservationsData);
       setCalendars(calendarsData);
       setAnnonces(annoncesData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement des données');
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * Charge les réservations pour un mois spécifique
+   */
+  const loadReservationsForMonth = async (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const monthKey = `${year}-${month}`;
+
+    // Si le mois est déjà chargé, ne pas recharger
+    if (loadedMonths.has(monthKey)) {
+      return;
+    }
+
+    try {
+      setLoadingReservations(true);
+      
+      // Calculer le début et la fin du mois
+      const startOfMonth = new Date(year, month, 1);
+      const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+
+      // Charger les réservations du mois
+      const monthReservations = await calendarApi.getReservationsByDateRange(
+        startOfMonth.toISOString(),
+        endOfMonth.toISOString(),
+      );
+
+      // Ajouter les nouvelles réservations sans doublons
+      setReservations((prev) => {
+        const existingIds = new Set(prev.map((r) => r._id));
+        const newReservations = monthReservations.filter((r) => !existingIds.has(r._id));
+        return [...prev, ...newReservations];
+      });
+
+      // Marquer le mois comme chargé
+      setLoadedMonths((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(monthKey);
+        return newSet;
+      });
+    } catch (err) {
+      console.error('Erreur lors du chargement des réservations du mois:', err);
+    } finally {
+      setLoadingReservations(false);
     }
   };
 
@@ -230,12 +283,32 @@ export default function ReservationsPage() {
 
       await calendarApi.updateReservation(selectedReservation._id, editFormData);
 
-      // Recharger les données
-      await loadData();
+      // Recharger les réservations du mois actuel
+      const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth();
+      const monthKey = `${currentYear}-${currentMonth}`;
+      setLoadedMonths((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(monthKey);
+        return newSet;
+      });
+      await loadReservationsForMonth(currentDate);
 
       // Fermer la modal et rouvrir les détails avec la réservation mise à jour
       onEditClose();
-      const updatedReservations = await calendarApi.getAllReservations();
+      
+      // Mettre à jour la réservation dans la liste locale
+      setReservations((prev) =>
+        prev.map((r) => (r._id === selectedReservation._id ? { ...r, ...editFormData } : r))
+      );
+      
+      // Recharger la réservation complète depuis le serveur
+      const startOfMonth = new Date(currentYear, currentMonth, 1);
+      const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59);
+      const updatedReservations = await calendarApi.getReservationsByDateRange(
+        startOfMonth.toISOString(),
+        endOfMonth.toISOString(),
+      );
       const updated = updatedReservations.find((r) => r._id === selectedReservation._id);
       if (updated) {
         setSelectedReservation(updated);
@@ -264,8 +337,8 @@ export default function ReservationsPage() {
 
       await calendarApi.deleteReservation(selectedReservation._id);
 
-      // Recharger les données
-      await loadData();
+      // Retirer la réservation supprimée de la liste
+      setReservations((prev) => prev.filter((r) => r._id !== selectedReservation._id));
 
       // Fermer les modals
       onDetailClose();
@@ -390,7 +463,7 @@ export default function ReservationsPage() {
         <Card>
           <CardHeader className="pb-2">
             <h2 className="text-lg sm:text-xl font-semibold">
-              Calendrier ({filteredReservations.length} réservation{filteredReservations.length > 1 ? 's' : ''})
+              Calendrier 
             </h2>
           </CardHeader>
           <CardBody className="p-0 sm:p-6">
@@ -711,7 +784,12 @@ export default function ReservationsPage() {
               }
        
             `}</style>
-            <div style={{ height: '600px' }} className="rbc-calendar">
+            <div style={{ height: '600px', position: 'relative' }} className="rbc-calendar">
+              {loadingReservations && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-black/80 z-10 rounded-lg">
+                  <Spinner size="lg" />
+                </div>
+              )}
               <Calendar
                 localizer={localizer}
                 events={calendarEvents}
@@ -720,6 +798,25 @@ export default function ReservationsPage() {
                 view="month"
                 date={currentDate}
                 onNavigate={setCurrentDate}
+                onRangeChange={(range) => {
+                  // Charger les réservations pour tous les mois visibles
+                  if (range && Array.isArray(range)) {
+                    range.forEach((date) => {
+                      if (date instanceof Date) {
+                        loadReservationsForMonth(date);
+                      }
+                    });
+                  } else if (range && range.start && range.end) {
+                    // Pour les vues autres que month
+                    const start = new Date(range.start);
+                    const end = new Date(range.end);
+                    const current = new Date(start);
+                    while (current <= end) {
+                      loadReservationsForMonth(new Date(current));
+                      current.setMonth(current.getMonth() + 1);
+                    }
+                  }
+                }}
                 onSelectEvent={handleSelectEvent}
                 onShowMore={handleShowMore}
                 views={['month']}

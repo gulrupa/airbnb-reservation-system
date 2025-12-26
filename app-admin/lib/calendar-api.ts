@@ -97,5 +97,15 @@ export const calendarApi = {
   deleteReservation: async (id: string): Promise<void> => {
     return api.delete<void>(`/reservations/${id}`);
   },
+
+  /**
+   * Récupère les réservations dans une plage de dates
+   * @param startDate - Date de début (ISO string)
+   * @param endDate - Date de fin (ISO string)
+   * @returns Liste des réservations dans la plage de dates
+   */
+  getReservationsByDateRange: async (startDate: string, endDate: string): Promise<Reservation[]> => {
+    return api.get<Reservation[]>(`/reservations/date-range/start/${startDate}/end/${endDate}`);
+  },
 };
 

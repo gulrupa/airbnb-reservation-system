@@ -40,7 +40,7 @@ interface CalendarEvent extends Event {
  */
 export default function ReservationsPage() {
   // État d'authentification
-  const { authenticated, loading: authLoading } = useAuth();
+  const { authenticated, loading: authLoading, isAdmin } = useAuth();
   const router = useRouter();
 
   // États pour les données
@@ -97,6 +97,13 @@ export default function ReservationsPage() {
       router.push('/login');
     }
   }, [authenticated, authLoading, router]);
+
+  // Redirection si l'utilisateur n'a pas le rôle admin
+  useEffect(() => {
+    if (!authLoading && authenticated && !isAdmin()) {
+      router.push('/');
+    }
+  }, [authenticated, authLoading, isAdmin, router]);
 
   // Chargement des données une fois authentifié
   useEffect(() => {
@@ -403,6 +410,11 @@ export default function ReservationsPage() {
   }
 
   if (!authenticated) {
+    return null;
+  }
+
+  // Vérifier le rôle admin
+  if (!isAdmin()) {
     return null;
   }
 
@@ -871,9 +883,18 @@ export default function ReservationsPage() {
                 }}
                 eventPropGetter={(event: CalendarEvent) => {
                   const isManualBlock = event.reservation.type === 'manual_block_date';
+                  const isCanceled = event.reservation.status === 'canceled';
+                  
+                  let backgroundColor = '#3b82f6'; // Bleu par défaut
+                  if (isCanceled) {
+                    backgroundColor = '#ef4444'; // Rouge pour les réservations annulées
+                  } else if (isManualBlock) {
+                    backgroundColor = '#f59e0b'; // Orange pour les blocages manuels
+                  }
+                  
                   return {
                     style: {
-                      backgroundColor: isManualBlock ? '#f59e0b' : '#3b82f6',
+                      backgroundColor,
                       color: 'white',
                       border: 'none',
                       padding: '4px 8px',
@@ -881,6 +902,7 @@ export default function ReservationsPage() {
                       fontWeight: '500',
                       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
                       transition: 'all 0.2s ease',
+                      opacity: isCanceled ? 0.7 : 1, // Légère transparence pour les annulées
                     },
                   };
                 }}

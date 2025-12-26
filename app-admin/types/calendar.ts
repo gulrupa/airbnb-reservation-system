@@ -76,6 +76,8 @@ export interface Reservation {
   numberOfTravelers: number;
   /** Type de réservation : 'reservation' ou 'manual_block_date' */
   type?: string;
+  /** Statut de la réservation : 'confirmed', 'paid', 'canceled' */
+  status?: string;
   /** ID du calendrier associé (référence MongoDB) */
   calendarUrlId?: string;
   /** Date de création */

@@ -17,8 +17,9 @@ import { Logo } from "@/components/icons";
 import { useState } from "react";
 
 export const Navbar = () => {
-  const { authenticated, loading, login, logout, keycloak } = useAuth();
+  const { authenticated, loading, login, logout, keycloak, isAdmin } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const userIsAdmin = isAdmin();
 
   return (
     <HeroUINavbar maxWidth="xl" position="sticky" onMenuOpenChange={setIsMenuOpen} isMenuOpen={isMenuOpen}>
@@ -40,26 +41,32 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden sm:flex gap-2">
-          <NextLink href="/reservations">
-            <Button variant="flat" size="sm">
-              Réservations
-            </Button>
-          </NextLink>
+          {userIsAdmin && (
+            <NextLink href="/reservations">
+              <Button variant="flat" size="sm">
+                Réservations
+              </Button>
+            </NextLink>
+          )}
           <NextLink href="/planning">
             <Button variant="flat" size="sm">
               Planning
             </Button>
           </NextLink>
-          <NextLink href="/statistiques">
-            <Button variant="flat" size="sm">
-              Statistiques
-            </Button>
-          </NextLink>
-          <NextLink href="/parametres">
-            <Button variant="flat" size="sm">
-              Paramètres
-            </Button>
-          </NextLink>
+          {userIsAdmin && (
+            <>
+              <NextLink href="/statistiques">
+                <Button variant="flat" size="sm">
+                  Statistiques
+                </Button>
+              </NextLink>
+              <NextLink href="/parametres">
+                <Button variant="flat" size="sm">
+                  Paramètres
+                </Button>
+              </NextLink>
+            </>
+          )}
           <ThemeSwitch />
         </NavbarItem>
         <NavbarItem>
@@ -92,17 +99,19 @@ export const Navbar = () => {
       <NavbarMenu>
         {authenticated && (
           <>
-            <NavbarMenuItem>
-              <NextLink
-                href="/reservations"
-                className="w-full"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Button variant="flat" className="w-full justify-start">
-                  Réservations
-                </Button>
-              </NextLink>
-            </NavbarMenuItem>
+            {userIsAdmin && (
+              <NavbarMenuItem>
+                <NextLink
+                  href="/reservations"
+                  className="w-full"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Button variant="flat" className="w-full justify-start">
+                    Réservations
+                  </Button>
+                </NextLink>
+              </NavbarMenuItem>
+            )}
             <NavbarMenuItem>
               <NextLink
                 href="/planning"
@@ -114,28 +123,32 @@ export const Navbar = () => {
                 </Button>
               </NextLink>
             </NavbarMenuItem>
-            <NavbarMenuItem>
-              <NextLink
-                href="/statistiques"
-                className="w-full"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Button variant="flat" className="w-full justify-start">
-                  Statistiques
-                </Button>
-              </NextLink>
-            </NavbarMenuItem>
-            <NavbarMenuItem>
-              <NextLink
-                href="/parametres"
-                className="w-full"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Button variant="flat" className="w-full justify-start">
-                  Paramètres
-                </Button>
-              </NextLink>
-            </NavbarMenuItem>
+            {userIsAdmin && (
+              <>
+                <NavbarMenuItem>
+                  <NextLink
+                    href="/statistiques"
+                    className="w-full"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Button variant="flat" className="w-full justify-start">
+                      Statistiques
+                    </Button>
+                  </NextLink>
+                </NavbarMenuItem>
+                <NavbarMenuItem>
+                  <NextLink
+                    href="/parametres"
+                    className="w-full"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Button variant="flat" className="w-full justify-start">
+                      Paramètres
+                    </Button>
+                  </NextLink>
+                </NavbarMenuItem>
+              </>
+            )}
             <NavbarMenuItem>
               <div className="flex items-center justify-between w-full">
                 <span className="text-sm">Thème</span>

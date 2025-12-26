@@ -18,7 +18,7 @@ import type { Reservation } from '@/types/calendar';
  * Affiche les revenus et taux de remplissage
  */
 export default function StatistiquesPage() {
-  const { authenticated, loading: authLoading } = useAuth();
+  const { authenticated, loading: authLoading, isAdmin } = useAuth();
   const router = useRouter();
 
   const [statistiques, setStatistiques] = useState<Statistiques | null>(null);
@@ -41,6 +41,13 @@ export default function StatistiquesPage() {
       router.push('/login');
     }
   }, [authenticated, authLoading, router]);
+
+  // Redirection si l'utilisateur n'a pas le rôle admin
+  useEffect(() => {
+    if (!authLoading && authenticated && !isAdmin()) {
+      router.push('/');
+    }
+  }, [authenticated, authLoading, isAdmin, router]);
 
   // Chargement des données
   useEffect(() => {
@@ -243,6 +250,11 @@ export default function StatistiquesPage() {
   }
 
   if (!authenticated) {
+    return null;
+  }
+
+  // Vérifier le rôle admin
+  if (!isAdmin()) {
     return null;
   }
 

@@ -8,22 +8,11 @@ import { Chip } from '@heroui/chip';
 import { Spinner } from '@heroui/spinner';
 import moment from 'moment';
 import 'moment/locale/fr';
-import { calendarApi } from '@/lib/calendar-api';
-import { annonceApi } from '@/lib/annonce-api';
 import { reservationApi } from '@/lib/reservation-api';
-import type { Reservation, CalendarUrl } from '@/types/calendar';
-import type { Annonce } from '@/types/annonce';
+import type { Reservation } from '@/types/calendar';
 
 // Configuration de moment en français
 moment.locale('fr');
-
-/**
- * Interface pour les réservations avec annonce associée
- */
-interface ReservationWithAnnonce extends Reservation {
-  annonce?: Annonce;
-  calendar?: CalendarUrl;
-}
 
 /**
  * Page de planning avec liste des réservations
@@ -36,8 +25,6 @@ export default function PlanningPage() {
 
   // États pour les données
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [calendars, setCalendars] = useState<CalendarUrl[]>([]);
-  const [annonces, setAnnonces] = useState<Annonce[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,10 +63,10 @@ export default function PlanningPage() {
   };
 
   /**
-   * Filtre et enrichit les réservations avec les annonces associées
+   * Filtre les réservations
    * Ne garde que les réservations à partir d'aujourd'hui
    */
-  const reservationsWithAnnonces: ReservationWithAnnonce[] = useMemo(() => {
+  const filteredReservations: Reservation[] = useMemo(() => {
     const today = moment().startOf('day');
     
     return reservations
@@ -92,55 +79,18 @@ export default function PlanningPage() {
         const endDate = moment(reservation.endDate);
         return endDate.isSameOrAfter(today);
       })
-      .map((reservation) => {
-        const calendar = calendars.find((c) => c._id === reservation.calendarUrlId);
-        const annonce = annonces.find((a) =>
-          a.calendarUrlIds?.some((cal) => {
-            const calId = typeof cal === 'string' ? cal : cal._id;
-            return calId === reservation.calendarUrlId;
-          }),
-        );
-
-        return {
-          ...reservation,
-          annonce,
-          calendar,
-        };
-      })
       .sort((a, b) => {
-        // Trier par date de début, puis par annonce
+        // Trier par date de début
         const dateA = moment(a.startDate);
         const dateB = moment(b.startDate);
-        if (dateA.isSame(dateB)) {
-          const annonceA = a.annonce?.title || '';
-          const annonceB = b.annonce?.title || '';
-          return annonceA.localeCompare(annonceB);
-        }
         return dateA.diff(dateB);
       });
-  }, [reservations, calendars, annonces]);
-
-  /**
-   * Groupe les réservations par annonce
-   */
-  const reservationsByAnnonce = useMemo(() => {
-    const grouped: Record<string, ReservationWithAnnonce[]> = {};
-    
-    reservationsWithAnnonces.forEach((reservation) => {
-      const annonceId = reservation.annonce?._id || 'sans-annonce';
-      if (!grouped[annonceId]) {
-        grouped[annonceId] = [];
-      }
-      grouped[annonceId].push(reservation);
-    });
-
-    return grouped;
-  }, [reservationsWithAnnonces]);
+  }, [reservations]);
 
   /**
    * Calcule le délai entre deux réservations
    */
-  const calculateDelay = (reservation1: ReservationWithAnnonce, reservation2: ReservationWithAnnonce): string => {
+  const calculateDelay = (reservation1: Reservation, reservation2: Reservation): string => {
     const end1 = moment(reservation1.endDate);
     const start2 = moment(reservation2.startDate);
     const diff = start2.diff(end1);
@@ -213,7 +163,7 @@ export default function PlanningPage() {
           </Card>
         )}
 
-        {reservationsWithAnnonces.length === 0 ? (
+        {filteredReservations.length === 0 ? (
           <Card>
             <CardBody>
               <p className="text-center text-default-500 py-8">
@@ -222,90 +172,79 @@ export default function PlanningPage() {
             </CardBody>
           </Card>
         ) : (
-          <div className="space-y-6">
-            {Object.entries(reservationsByAnnonce).map(([annonceId, annonceReservations]) => {
-              const annonce = annonceReservations[0]?.annonce;
-              
-              return (
-                <Card key={annonceId} className="shadow-md">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between w-full">
-                      <h2 className="text-lg sm:text-xl font-semibold">
-                        {annonce?.title || 'Annonce non associée'}
-                      </h2>
-                      <Chip size="sm" variant="flat" color="primary">
-                        {annonceReservations.length} réservation{annonceReservations.length > 1 ? 's' : ''}
-                      </Chip>
-                    </div>
-                    {annonce?.address && (
-                      <p className="text-sm text-default-500 mt-1">{annonce.address}</p>
-                    )}
-                  </CardHeader>
-                  <CardBody className="p-4">
-                    <div className="space-y-6">
-                      {annonceReservations.map((reservation, index) => {
-                        const previousReservation = index > 0 ? annonceReservations[index - 1] : null;
-                        const delay = previousReservation 
-                          ? calculateDelay(previousReservation, reservation)
-                          : null;
+          <Card className="shadow-md">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between w-full">
+                <h2 className="text-lg sm:text-xl font-semibold">
+                  Réservations à venir
+                </h2>
+                <Chip size="sm" variant="flat" color="primary">
+                  {filteredReservations.length} réservation{filteredReservations.length > 1 ? 's' : ''}
+                </Chip>
+              </div>
+            </CardHeader>
+            <CardBody className="p-4">
+              <div className="space-y-6">
+                {filteredReservations.map((reservation, index) => {
+                  const previousReservation = index > 0 ? filteredReservations[index - 1] : null;
+                  const delay = previousReservation 
+                    ? calculateDelay(previousReservation, reservation)
+                    : null;
 
-                        return (
-                          <div key={reservation._id} className="space-y-3">
-                            {/* Délai avec la réservation précédente - affiché en premier */}
-                            {delay && (
-                              <div className="flex items-center justify-center py-2 px-4 bg-default-100 dark:bg-default-50 rounded-lg border border-default-200">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-semibold text-default-700">Délai entre les réservations :</span>
-                                  <Chip 
-                                    size="md" 
-                                    variant="flat" 
-                                    color={delay === 'Chevauchement' ? 'danger' : delay === 'Aucun délai' ? 'warning' : 'success'}
-                                    className="font-bold"
-                                  >
-                                    {delay}
-                                  </Chip>
-                                </div>
-                              </div>
+                  return (
+                    <div key={reservation._id} className="space-y-3">
+                      {/* Délai avec la réservation précédente - affiché en premier */}
+                      {delay && (
+                        <div className="flex items-center justify-center py-2 px-4 bg-default-100 dark:bg-default-50 rounded-lg border border-default-200">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-default-700">Délai entre les réservations :</span>
+                            <Chip 
+                              size="md" 
+                              variant="flat" 
+                              color={delay === 'Chevauchement' ? 'danger' : delay === 'Aucun délai' ? 'warning' : 'success'}
+                              className="font-bold"
+                            >
+                              {delay}
+                            </Chip>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Bloc de réservation */}
+                      <div className="border-l-4 border-primary bg-default-50 dark:bg-default-100 rounded-r-lg shadow-sm">
+                        <div className="p-4">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Chip size="sm" variant="flat" color="primary" className="font-semibold">
+                              {reservation.externalId}
+                            </Chip>
+                            {reservation.numberOfTravelers > 0 && (
+                              <span className="text-sm text-default-600 font-medium">
+                                {reservation.numberOfTravelers} voyageur{reservation.numberOfTravelers > 1 ? 's' : ''}
+                              </span>
                             )}
-
-                            {/* Bloc de réservation */}
-                            <div className="border-l-4 border-primary bg-default-50 dark:bg-default-100 rounded-r-lg shadow-sm">
-                              <div className="p-4">
-                                <div className="flex items-center gap-2 mb-4">
-                                  <Chip size="sm" variant="flat" color="primary" className="font-semibold">
-                                    {reservation.externalId}
-                                  </Chip>
-                                  {reservation.numberOfTravelers > 0 && (
-                                    <span className="text-sm text-default-600 font-medium">
-                                      {reservation.numberOfTravelers} voyageur{reservation.numberOfTravelers > 1 ? 's' : ''}
-                                    </span>
-                                  )}
-                                </div>
-                                
-                                {/* Dates et heures */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div className="bg-white dark:bg-default-200 p-4 rounded-lg border border-default-200">
-                                    <p className="text-default-500 text-xs mb-2 font-medium uppercase tracking-wide">Début</p>
-                                    <p className="font-bold text-xl mb-1">{formatDate(reservation.startDate)}</p>
-                                    <p className="text-default-700 font-semibold text-lg">{formatTime(reservation.startDate)}</p>
-                                  </div>
-                                  <div className="bg-white dark:bg-default-200 p-4 rounded-lg border border-default-200">
-                                    <p className="text-default-500 text-xs mb-2 font-medium uppercase tracking-wide">Fin</p>
-                                    <p className="font-bold text-xl mb-1">{formatDate(reservation.endDate)}</p>
-                                    <p className="text-default-700 font-semibold text-lg">{formatTime(reservation.endDate)}</p>
-                                  </div>
-                                </div>
-                              </div>
+                          </div>
+                          
+                          {/* Dates et heures */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="bg-white dark:bg-default-200 p-4 rounded-lg border border-default-200">
+                              <p className="text-default-500 text-xs mb-2 font-medium uppercase tracking-wide">Début</p>
+                              <p className="font-bold text-xl mb-1">{formatDate(reservation.startDate)}</p>
+                              <p className="text-default-700 font-semibold text-lg">{formatTime(reservation.startDate)}</p>
+                            </div>
+                            <div className="bg-white dark:bg-default-200 p-4 rounded-lg border border-default-200">
+                              <p className="text-default-500 text-xs mb-2 font-medium uppercase tracking-wide">Fin</p>
+                              <p className="font-bold text-xl mb-1">{formatDate(reservation.endDate)}</p>
+                              <p className="text-default-700 font-semibold text-lg">{formatTime(reservation.endDate)}</p>
                             </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      </div>
                     </div>
-                  </CardBody>
-                </Card>
-              );
-            })}
-          </div>
+                  );
+                })}
+              </div>
+            </CardBody>
+          </Card>
         )}
       </div>
     </div>

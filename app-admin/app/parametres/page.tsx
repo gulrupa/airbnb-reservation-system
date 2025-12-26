@@ -20,7 +20,7 @@ import { JobsSection } from '@/components/parametres/JobsSection';
  * Les paramètres sont organisés en onglets pour une navigation facile.
  */
 export default function ParametresPage() {
-  const { authenticated, loading: authLoading } = useAuth();
+  const { authenticated, loading: authLoading, isAdmin } = useAuth();
   const router = useRouter();
 
   // Redirection vers la page de login si non authentifié
@@ -29,6 +29,13 @@ export default function ParametresPage() {
       router.push('/login');
     }
   }, [authenticated, authLoading, router]);
+
+  // Redirection si l'utilisateur n'a pas le rôle admin
+  useEffect(() => {
+    if (!authLoading && authenticated && !isAdmin()) {
+      router.push('/');
+    }
+  }, [authenticated, authLoading, isAdmin, router]);
 
   // Affichage d'un spinner pendant le chargement de l'authentification
   if (authLoading) {
@@ -41,6 +48,11 @@ export default function ParametresPage() {
 
   // Ne rien afficher si non authentifié (redirection gérée par useEffect)
   if (!authenticated) {
+    return null;
+  }
+
+  // Ne rien afficher si l'utilisateur n'a pas le rôle admin (redirection gérée par useEffect)
+  if (!isAdmin()) {
     return null;
   }
 

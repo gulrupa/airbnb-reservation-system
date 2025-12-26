@@ -113,7 +113,7 @@ export class ReservationRepository {
   }
 
   /**
-   * Récupère les réservations valides (non blocages manuels, prix > 0) dont la date de début est après une date donnée
+   * Récupère les réservations valides (non blocages manuels, prix > 0, non annulées) dont la date de début est après une date donnée
    * Retourne des objets JavaScript simples (lean) pour les calculs
    * @param afterDate Date après laquelle chercher
    * @returns Liste des réservations valides triées par date de début
@@ -123,6 +123,7 @@ export class ReservationRepository {
       .find({
         type: { $ne: 'manual_block_date' },
         startDate: { $gt: afterDate },
+        status: { $ne: 'canceled' } 
       })
       .sort({ startDate: -1 })
       .lean()

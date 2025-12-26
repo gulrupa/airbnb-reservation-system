@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getKeycloak, initKeycloak } from '@/lib/keycloak';
+import { getKeycloak, initKeycloak, keycloakConfig } from '@/lib/keycloak';
 import type Keycloak from 'keycloak-js';
 
 interface AuthContextType {
@@ -10,6 +10,8 @@ interface AuthContextType {
   loading: boolean;
   login: () => void;
   logout: () => void;
+  hasRole: (role: string) => boolean;
+  isAdmin: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,6 +20,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   login: () => {},
   logout: () => {},
+  hasRole: () => false,
+  isAdmin: () => false,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -80,6 +84,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const hasRole = (role: string): boolean => {
+    if (!keycloak || !authenticated) {
+      return false;
+    }
+
+    // Vérifier les rôles du realm
+    const realmRoles = keycloak.realmAccess?.roles || [];
+    if (realmRoles.includes(role)) {
+      return true;
+    }
+
+    // Vérifier les rôles du client
+    const clientId = keycloakConfig.clientId;
+    const clientRoles = keycloak.resourceAccess?.[clientId]?.roles || [];
+    if (clientRoles.includes(role)) {
+      return true;
+    }
+
+    // Vérifier dans le token parsé
+    const tokenParsed = keycloak.tokenParsed as any;
+    if (tokenParsed?.realm_access?.roles?.includes(role)) {
+      return true;
+    }
+    if (tokenParsed?.resource_access?.[clientId]?.roles?.includes(role)) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const isAdmin = (): boolean => {
+    return hasRole('admin');
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -88,6 +126,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         loading,
         login,
         logout,
+        hasRole,
+        isAdmin,
       }}
     >
       {children}

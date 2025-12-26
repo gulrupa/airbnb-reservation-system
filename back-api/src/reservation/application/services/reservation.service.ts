@@ -159,7 +159,7 @@ export class ReservationService {
     calendar.updatePropertyWithValue('version', '2.0');
     calendar.updatePropertyWithValue('calscale', 'GREGORIAN');
     calendar.updatePropertyWithValue('method', 'PUBLISH');
-    calendar.updatePropertyWithValue('x-wr-calname', 'Réservations futures');
+    calendar.updatePropertyWithValue('x-wr-calname', 'Réservations Monge');
     calendar.updatePropertyWithValue('x-wr-timezone', 'Europe/Paris');
 
     // Ajouter chaque réservation comme un événement VEVENT
@@ -185,12 +185,8 @@ export class ReservationService {
       
       // URL cliquable (sera rendue cliquable dans les applications de calendrier)
       // Le champ URL est automatiquement rendu cliquable par la plupart des applications de calendrier
-      const apiUrl = process.env.API_URL || 'https://api.booking.gul-si.fr';
+      const apiUrl = process.env.API_URL || 'https://admin.booking.gul-si.fr';
       vevent.updatePropertyWithValue('url', apiUrl);
-      
-
-      let description = `\n\nVoir les détails: ${apiUrl}`;
-      vevent.updatePropertyWithValue('description', description);
       
       // Statut de l'événement
       if (reservation.status === 'canceled') {

@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Chip } from '@heroui/chip';
 import { Spinner } from '@heroui/spinner';
+import { Button } from '@heroui/button';
 import moment from 'moment';
 import 'moment/locale/fr';
 import { reservationApi } from '@/lib/reservation-api';
@@ -138,6 +139,23 @@ export default function PlanningPage() {
     return moment(dateString).format('HH:mm');
   };
 
+  /**
+   * Récupère l'URL du calendrier iCal avec le protocole webcal://
+   * Le protocole webcal:// permet d'ouvrir directement dans l'application de calendrier
+   */
+  const getWebcalUrl = () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.booking.gul-si.fr';
+    const httpsUrl = `${apiUrl}/reservations/future/ical`;
+    return httpsUrl.replace(/^https?:\/\//, 'webcal://');
+  };
+
+  /**
+   * Ouvre le lien iCal avec le protocole webcal:// pour ajout automatique
+   */
+  const addToCalendar = () => {
+    window.location.href = getWebcalUrl();
+  };
+
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -153,7 +171,32 @@ export default function PlanningPage() {
   return (
     <div className="container mx-auto p-3 sm:p-6 max-w-7xl">
       <div className="mb-4 sm:mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4">Planning des réservations</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold">Planning des réservations</h1>
+          <Button
+            color="primary"
+            variant="flat"
+            onPress={addToCalendar}
+            startContent={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+                />
+              </svg>
+            }
+          >
+            Ajouter au calendrier
+          </Button>
+        </div>
 
         {error && (
           <Card className="mb-4 border-danger">

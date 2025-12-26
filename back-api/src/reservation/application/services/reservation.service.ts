@@ -8,6 +8,8 @@ import { ReservationRepository } from '../repositories/reservation.repository';
 import { ReservationDocument } from '../../infrastructure/database/schemas/reservation.schema';
 import { CreateReservationDto } from '../dto/create-reservation.dto';
 import { UpdateReservationDto } from '../dto/update-reservation.dto';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ICAL = require('ical.js');
 
 @Injectable()
 export class ReservationService {
@@ -142,6 +144,58 @@ export class ReservationService {
     today.setHours(0, 0, 0, 0);
 
     return this.reservationRepository.findValidReservationsAfterDate(today);
+  }
+
+  /**
+   * Génère un fichier iCal contenant les réservations futures
+   * @returns Le contenu du fichier iCal au format string
+   */
+  async generateIcalForFutureReservations(): Promise<string> {
+    const reservations = await this.getFutureReservations();
+
+    // Créer un nouveau composant VCALENDAR
+    const calendar = new ICAL.Component(['vcalendar', [], []]);
+    calendar.updatePropertyWithValue('prodid', '-//Airbnb Reservation System//EN');
+    calendar.updatePropertyWithValue('version', '2.0');
+    calendar.updatePropertyWithValue('calscale', 'GREGORIAN');
+    calendar.updatePropertyWithValue('method', 'PUBLISH');
+    calendar.updatePropertyWithValue('x-wr-calname', 'Réservations futures');
+    calendar.updatePropertyWithValue('x-wr-timezone', 'Europe/Paris');
+
+    // Ajouter chaque réservation comme un événement VEVENT
+    for (const reservation of reservations) {
+      const vevent = new ICAL.Component('vevent');
+      
+      // UID unique pour chaque réservation
+      vevent.updatePropertyWithValue('uid', `reservation-${reservation._id}@airbnb-reservation-system`);
+      
+      // Dates
+      const startDate = new ICAL.Time.fromJSDate(new Date(reservation.startDate), true);
+      const endDate = new ICAL.Time.fromJSDate(new Date(reservation.endDate), true);
+      
+      vevent.addPropertyWithValue('dtstart', startDate);
+      vevent.addPropertyWithValue('dtend', endDate);
+      vevent.addPropertyWithValue('dtstamp', ICAL.Time.now());
+      
+      // Titre de l'événement
+      const summary = reservation.type === 'manual_block_date' 
+        ? 'Blocage manuel' 
+        : `Réservation ${reservation.externalId}`;
+      vevent.updatePropertyWithValue('summary', summary);
+      
+      // Statut de l'événement
+      if (reservation.status === 'canceled') {
+        vevent.updatePropertyWithValue('status', 'CANCELLED');
+      } else {
+        vevent.updatePropertyWithValue('status', 'CONFIRMED');
+      }
+      
+      // Ajouter l'événement au calendrier
+      calendar.addSubcomponent(vevent);
+    }
+
+    // Générer le contenu iCal
+    return calendar.toString();
   }
 
   /**

@@ -11,7 +11,10 @@ import {
   HttpStatus,
   BadRequestException,
   Logger,
+  Res,
+  Header,
 } from '@nestjs/common';
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -20,7 +23,7 @@ import {
   ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
-import { Roles } from 'nest-keycloak-connect';
+import { Public, Roles } from 'nest-keycloak-connect';
 import { ReservationService } from '../../application/services/reservation.service';
 import { CreateReservationDto } from '../../application/dto/create-reservation.dto';
 import { UpdateReservationDto } from '../../application/dto/update-reservation.dto';
@@ -83,6 +86,32 @@ export class ReservationController {
       data: reservations,
       count: reservations.length,
     };
+  }
+
+  @Get('future/ical')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Header('Content-Type', 'text/calendar; charset=utf-8')
+  @Header('Content-Disposition', 'attachment; filename="reservations-futures.ics"')
+  @ApiOperation({
+    summary: 'Récupérer les réservations à venir au format iCal',
+    description: 'Retourne un fichier iCal (.ics) contenant toutes les réservations valides futures (après aujourd\'hui)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Fichier iCal des réservations futures',
+    content: {
+      'text/calendar': {
+        schema: {
+          type: 'string',
+        },
+      },
+    },
+  })
+  async getFutureReservationsIcal(@Res() res: Response) {
+    this.logger.log('Génération du calendrier iCal des réservations à venir');
+    const icalContent = await this.reservationService.generateIcalForFutureReservations();
+    res.send(icalContent);
   }
   
   @Get(':id')

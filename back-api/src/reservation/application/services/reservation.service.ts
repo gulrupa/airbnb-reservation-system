@@ -141,9 +141,22 @@ export class ReservationService {
 
   async getFutureReservations(): Promise<ReservationDocument[]> {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     return this.reservationRepository.findValidReservationsAfterDate(today);
+  }
+
+  /**
+   * Récupère les réservations futures pour un calendrier spécifique
+   * @param calendarUrlId - ID du calendrier
+   * @returns Liste des réservations futures pour ce calendrier
+   */
+  async getFutureReservationsByCalendarUrlId(
+    calendarUrlId: string,
+  ): Promise<ReservationDocument[]> {
+    const today = new Date();
+    return this.reservationRepository.findValidFutureReservationsByCalendarUrlId(
+      calendarUrlId,
+      today,
+    );
   }
 
   /**

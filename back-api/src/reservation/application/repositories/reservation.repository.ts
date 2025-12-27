@@ -122,11 +122,33 @@ export class ReservationRepository {
     return this.reservationModel
       .find({
         type: { $ne: 'manual_block_date' },
-        startDate: { $gt: afterDate },
+        endDate: { $gte: afterDate },
         status: { $ne: 'canceled' } 
       })
       .sort({ startDate: -1 })
       .lean()
+      .exec();
+  }
+
+  /**
+   * Récupère les réservations valides futures (non blocages manuels, non annulées) pour un calendrier spécifique
+   * Retourne des objets ReservationDocument complets
+   * @param calendarUrlId ID du calendrier
+   * @param afterDate Date après laquelle chercher
+   * @returns Liste des réservations valides futures pour ce calendrier triées par date de début
+   */
+  async findValidFutureReservationsByCalendarUrlId(
+    calendarUrlId: string,
+    afterDate: Date,
+  ): Promise<ReservationDocument[]> {
+    return this.reservationModel
+      .find({
+        calendarUrlId,
+        type: { $ne: 'manual_block_date' },
+        endDate: { $gte: afterDate },
+        status: { $ne: 'canceled' },
+      })
+      .sort({ startDate: -1 })
       .exec();
   }
 }

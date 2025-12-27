@@ -421,12 +421,31 @@ export default function ReservationsPage() {
   return (
     <div className="container mx-auto p-3 sm:p-6 max-w-7xl">
       <div className="mb-4 sm:mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4">Réservations</h1>
+        <div className="flex items-center gap-3 mb-6">
+
+          <h1 className="text-2xl sm:text-3xl font-bold">Réservations</h1>
+        </div>
 
         {/* Filtres */}
-        <Card className="mb-4">
-          <CardHeader className="pb-2">
-            <h2 className="text-lg font-semibold">Filtres</h2>
+        <Card className="mb-4 shadow-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"
+                />
+              </svg>
+              <h2 className="text-lg font-semibold">Filtres</h2>
+            </div>
           </CardHeader>
           <CardBody>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -473,11 +492,27 @@ export default function ReservationsPage() {
         )}
 
         {/* Calendrier */}
-        <Card>
-          <CardHeader className="pb-2">
-            <h2 className="text-lg sm:text-xl font-semibold">
-              Calendrier 
-            </h2>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5 sm:w-6 sm:h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+                />
+              </svg>
+              <h2 className="text-lg sm:text-xl font-semibold">
+                Calendrier 
+              </h2>
+            </div>
           </CardHeader>
           <CardBody className="p-0 sm:p-6">
             <style jsx global>{`
@@ -488,20 +523,26 @@ export default function ReservationsPage() {
               /* Conteneur principal du calendrier - arrondi et ombre */
               .rbc-calendar {
                 overflow: hidden !important;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+                border-radius: 12px !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
                 background-color: #ffffff !important;
+                border: 1px solid #e5e7eb !important;
               }
               
               .dark .rbc-calendar {
                 background-color: #1a1a1a !important;
                 color: #e4e4e7 !important;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+                border-color: #3f3f46 !important;
               }
               
               /* En-tête du calendrier - arrondi en haut */
               .rbc-header {
-                padding: 12px 8px !important;
+                padding: 14px 8px !important;
                 font-weight: 600 !important;
+                font-size: 13px !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
                 border-bottom: 1px solid #e5e7eb !important;
                 background-color: #f9fafb !important;
                 color: #374151 !important;
@@ -589,6 +630,8 @@ export default function ReservationsPage() {
               
               .rbc-row-segment {
                 border-color: #e5e7eb !important;
+               padding: 2px 2px !important;
+
               }
               
               .dark .rbc-day-bg {
@@ -620,8 +663,24 @@ export default function ReservationsPage() {
                 border-color: #3f3f46 !important;
               }
               
+              /* Jour actuel - style amélioré */
+              .rbc-today {
+                background-color: #eff6ff !important;
+                border: 2px solid #3b82f6 !important;
+              }
+              
+              .rbc-today .rbc-date-cell {
+                font-weight: 700 !important;
+                color: #3b82f6 !important;
+              }
+              
               .dark .rbc-today {
-                background-color: #27272a !important;
+                background-color: #1e3a5f !important;
+                border-color: #3b82f6 !important;
+              }
+              
+              .dark .rbc-today .rbc-date-cell {
+                color: #60a5fa !important;
               }
               
               .dark .rbc-off-range-bg {
@@ -642,61 +701,134 @@ export default function ReservationsPage() {
               
               /* Barre d'outils - arrondie et stylisée */
               .rbc-toolbar {
-                padding: 16px !important;
-                border-radius: 0 !important;
+                padding: 16px 20px !important;
+                border-radius: 12px 12px 0 0 !important;
                 background-color: #f9fafb !important;
                 border-bottom: 1px solid #e5e7eb !important;
                 flex-wrap: wrap !important;
+                gap: 12px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+              }
+              
+              .rbc-toolbar-label {
+                font-size: 18px !important;
+                font-weight: 700 !important;
+                padding: 8px 4px !important;
+                text-align: center !important;
+                width: 100% !important;
+                order: -1 !important;
+                margin-bottom: 4px !important;
+                border-bottom: 1px solid #e5e7eb !important;
+                padding-bottom: 12px !important;
+                color: #111827 !important;
+              }
+              
+              .rbc-toolbar button {
+                border-radius: 8px !important;
+                padding: 10px 16px !important;
+                font-weight: 500 !important;
+                font-size: 14px !important;
+                transition: all 0.2s ease !important;
+                border: 1px solid #e5e7eb !important;
+                background-color: #ffffff !important;
+                color: #374151 !important;
+              }
+              
+              .rbc-toolbar button:hover {
+                background-color: #f3f4f6 !important;
+                transform: translateY(-1px) !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+              }
+              
+              .rbc-toolbar button.rbc-active {
+                background-color: #3b82f6 !important;
+                color: #ffffff !important;
+                border-color: #3b82f6 !important;
+                box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3) !important;
+              }
+              
+              /* Forcer les boutons à être sur une ligne et centrés */
+              .rbc-toolbar .rbc-btn-group {
+                display: flex !important;
+                width: 100% !important;
                 gap: 8px !important;
+                justify-content: center !important;
+                align-items: center !important;
               }
               
               /* Styles pour mobile - toolbar responsive */
               @media (max-width: 640px) {
                 .rbc-toolbar {
+                  padding: 12px 8px !important;
+                  gap: 12px !important;
+                  flex-direction: column !important;
+                  align-items: stretch !important;
+                }
+                
+                .rbc-toolbar-label {
+                  font-size: 16px !important;
+                  font-weight: 700 !important;
                   padding: 8px 4px !important;
-                  gap: 4px !important;
+                  text-align: center !important;
+                  width: 100% !important;
+                  order: -1 !important;
+                  margin-bottom: 4px !important;
+                  border-bottom: 1px solid #e5e7eb !important;
+                  padding-bottom: 12px !important;
+                }
+                
+                .dark .rbc-toolbar-label {
+                  border-bottom-color: #3f3f46 !important;
                 }
                 
                 .rbc-toolbar button {
-                  font-size: 12px !important;
-                  padding: 6px 8px !important;
+                  font-size: 13px !important;
+                  padding: 10px 12px !important;
                   min-width: auto !important;
                   flex: 1 1 auto !important;
                   max-width: calc(33.333% - 4px) !important;
                 }
                 
-                .rbc-toolbar-label {
-                  font-size: 14px !important;
-                  padding: 0 4px !important;
-                  flex: 1 1 100% !important;
-                  text-align: center !important;
-                  order: -1 !important;
-                  margin-bottom: 8px !important;
+                /* Forcer les boutons à être sur une ligne */
+                .rbc-toolbar .rbc-btn-group {
+                  display: flex !important;
+                  width: 100% !important;
+                  gap: 8px !important;
+                  justify-content: space-between !important;
                 }
               }
               
               .dark .rbc-toolbar {
                 color: #e4e4e7 !important;
                 background-color: #1a1a1a !important;
+                border-bottom-color: #3f3f46 !important;
+              }
+              
+              .dark .rbc-toolbar-label {
+                color: #e4e4e7 !important;
+                border-bottom-color: #3f3f46 !important;
               }
               
               .dark .rbc-toolbar button {
                 color: #e4e4e7 !important;
-                background-color: transparent !important;
+                background-color: #27272a !important;
                 border-color: #3f3f46 !important;
               }
               
               .dark .rbc-toolbar button:hover {
-                background-color: #27272a !important;
+                background-color: #3f3f46 !important;
                 color: #ffffff !important;
                 transform: translateY(-1px) !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
               }
               
               .dark .rbc-toolbar button.rbc-active {
-                background-color: #9333ea !important;
+                background-color: #3b82f6 !important;
                 color: #ffffff !important;
-                border-color: #9333ea !important;
-                box-shadow: 0 2px 4px rgba(147, 51, 234, 0.3) !important;
+                border-color: #3b82f6 !important;
+                box-shadow: 0 2px 4px rgba(59, 130, 246, 0.4) !important;
               }
               
               /* Styles mobile pour dark mode */
@@ -767,16 +899,28 @@ export default function ReservationsPage() {
               }
               
               .rbc-date-cell {
-                padding: 8px !important;
                 transition: all 0.2s ease !important;
+                border-radius: 6px !important;
+                margin: 2px !important;
               }
+              
+
               
               .rbc-date-cell:hover {
                 background-color: #f3f4f6 !important;
               }
               
+              .rbc-date-cell > a {
+                font-weight: 500 !important;
+                transition: all 0.2s ease !important;
+              }
+              
               .dark .rbc-date-cell:hover {
                 background-color: #27272a !important;
+              }
+              
+              .dark .rbc-date-cell > a {
+                color: #e4e4e7 !important;
               }
               
               /* Griser les jours hors du mois affiché - Mode clair */
@@ -830,9 +974,132 @@ export default function ReservationsPage() {
               .dark .rbc-off-range-bg .rbc-event {
                 opacity: 0.4 !important;
               }
+              
+              /* Amélioration des événements - style fin et élégant */
+              .rbc-event {
+                border-radius: 4px !important;
+                padding: 4px 8px !important;
+                cursor: pointer !important;
+                transition: all 0.2s ease !important;
+                border: none !important;
+                min-height: 20px !important;
+                display: flex !important;
+                align-items: center !important;
+              }
+              
+              .rbc-event:hover {
+                opacity: 0.9 !important;
+                transform: translateY(-1px) !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+                z-index: 10 !important;
+              }
+              
+              .rbc-event-content {
+                font-weight: 500 !important;
+                font-size: 11px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                letter-spacing: 0.2px !important;
+              }
+              
+              /* Style spécial pour les réservations multi-jours */
+              .rbc-event-continues-prior {
+                border-top-left-radius: 0 !important;
+                border-bottom-left-radius: 0 !important;
+                margin-left: 0 !important;
+              }
+              
+              .rbc-event-continues-after {
+                border-top-right-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+                margin-right: 0 !important;
+              }
+              
+              .rbc-event-continues-earlier {
+                border-top-left-radius: 0 !important;
+                border-bottom-left-radius: 0 !important;
+                margin-left: 0 !important;
+              }
+              
+              .rbc-event-continues-later {
+                border-top-right-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+                margin-right: 0 !important;
+              }
+              
+              /* Amélioration du "show more" - style fin */
+              .rbc-show-more {
+                background-color: #f3f4f6 !important;
+                color: #3b82f6 !important;
+                border-radius: 4px !important;
+                padding: 4px 8px !important;
+                font-weight: 500 !important;
+                font-size: 11px !important;
+                cursor: pointer !important;
+                transition: all 0.2s ease !important;
+                border: 1px solid #e5e7eb !important;
+              }
+              
+              .rbc-show-more:hover {
+                background-color: #e5e7eb !important;
+                color: #2563eb !important;
+              }
+              
+              .dark .rbc-show-more {
+                background-color: #27272a !important;
+                color: #60a5fa !important;
+                border-color: #3f3f46 !important;
+              }
+              
+              .dark .rbc-show-more:hover {
+                background-color: #3f3f46 !important;
+                color: #93c5fd !important;
+              }
+              
+              /* Amélioration des cellules de jour */
+              .rbc-day-bg {
+                transition: background-color 0.2s ease !important;
+              }
+              
+              .rbc-day-bg:hover {
+                background-color: #f9fafb !important;
+              }
+              
+              .dark .rbc-day-bg:hover {
+                background-color: #27272a !important;
+              }
+              
+              /* Amélioration de la grille */
+              .rbc-month-view {
+                border-radius: 0 0 12px 12px !important;
+              }
+              
+              .rbc-month-view table {
+                border-collapse: separate !important;
+                border-spacing: 0 !important;
+              }
+              
+              .rbc-month-view table td {
+                border-right: 1px solid #e5e7eb !important;
+                border-bottom: 1px solid #e5e7eb !important;
+              }
+              
+              .rbc-month-view table td:last-child {
+                border-right: none !important;
+              }
+              
+              .dark .rbc-month-view table td {
+                border-right-color: #3f3f46 !important;
+                border-bottom-color: #3f3f46 !important;
+              }
+              
+              .dark .rbc-month-view table td:last-child {
+                border-right: none !important;
+              }
        
             `}</style>
-            <div style={{ height: '600px', position: 'relative' }} className="rbc-calendar">
+            <div style={{ height: '700px', position: 'relative' }} className="rbc-calendar">
               {loadingReservations && (
                 <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-black/80 z-10 rounded-lg">
                   <Spinner size="lg" />
@@ -885,24 +1152,30 @@ export default function ReservationsPage() {
                   const isManualBlock = event.reservation.type === 'manual_block_date';
                   const isCanceled = event.reservation.status === 'canceled';
                   
-                  let backgroundColor = '#3b82f6'; // Bleu par défaut
+                  let backgroundColor = '#e0e7ff'; // Bleu très clair par défaut
+                  let textColor = '#4f46e5'; // Bleu foncé pour le texte
+                  
                   if (isCanceled) {
-                    backgroundColor = '#ef4444'; // Rouge pour les réservations annulées
+                    backgroundColor = '#fee2e2'; // Rouge très clair
+                    textColor = '#dc2626'; // Rouge foncé pour le texte
                   } else if (isManualBlock) {
-                    backgroundColor = '#f59e0b'; // Orange pour les blocages manuels
+                    backgroundColor = '#fef3c7'; // Orange très clair
+                    textColor = '#d97706'; // Orange foncé pour le texte
                   }
                   
                   return {
                     style: {
                       backgroundColor,
-                      color: 'white',
+                      color: textColor,
                       border: 'none',
                       padding: '4px 8px',
-                      fontSize: '12px',
+                      fontSize: '11px',
                       fontWeight: '500',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
+                      borderRadius: '4px',
+                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
                       transition: 'all 0.2s ease',
-                      opacity: isCanceled ? 0.7 : 1, // Légère transparence pour les annulées
+                      opacity: isCanceled ? 0.7 : 1,
+                      cursor: 'pointer',
                     },
                   };
                 }}

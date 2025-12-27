@@ -42,11 +42,11 @@ export const Navbar = () => {
       >
         <NavbarItem className="hidden sm:flex gap-2">
           {userIsAdmin && (
-            <NextLink href="/reservations">
-              <Button variant="flat" size="sm">
-                Réservations
-              </Button>
-            </NextLink>
+          <NextLink href="/reservations">
+            <Button variant="flat" size="sm">
+              Réservations
+            </Button>
+          </NextLink>
           )}
           <NextLink href="/planning">
             <Button variant="flat" size="sm">
@@ -55,16 +55,16 @@ export const Navbar = () => {
           </NextLink>
           {userIsAdmin && (
             <>
-              <NextLink href="/statistiques">
-                <Button variant="flat" size="sm">
-                  Statistiques
-                </Button>
-              </NextLink>
-              <NextLink href="/parametres">
-                <Button variant="flat" size="sm">
-                  Paramètres
-                </Button>
-              </NextLink>
+          <NextLink href="/statistiques">
+            <Button variant="flat" size="sm">
+              Statistiques
+            </Button>
+          </NextLink>
+          <NextLink href="/parametres">
+            <Button variant="flat" size="sm">
+              Paramètres
+            </Button>
+          </NextLink>
             </>
           )}
           <ThemeSwitch />
@@ -100,17 +100,17 @@ export const Navbar = () => {
         {authenticated && (
           <>
             {userIsAdmin && (
-              <NavbarMenuItem>
-                <NextLink
-                  href="/reservations"
-                  className="w-full"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <Button variant="flat" className="w-full justify-start">
-                    Réservations
-                  </Button>
-                </NextLink>
-              </NavbarMenuItem>
+            <NavbarMenuItem>
+              <NextLink
+                href="/reservations"
+                className="w-full"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Button variant="flat" className="w-full justify-start">
+                  Réservations
+                </Button>
+              </NextLink>
+            </NavbarMenuItem>
             )}
             <NavbarMenuItem>
               <NextLink
@@ -125,28 +125,28 @@ export const Navbar = () => {
             </NavbarMenuItem>
             {userIsAdmin && (
               <>
-                <NavbarMenuItem>
-                  <NextLink
-                    href="/statistiques"
-                    className="w-full"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Button variant="flat" className="w-full justify-start">
-                      Statistiques
-                    </Button>
-                  </NextLink>
-                </NavbarMenuItem>
-                <NavbarMenuItem>
-                  <NextLink
-                    href="/parametres"
-                    className="w-full"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Button variant="flat" className="w-full justify-start">
-                      Paramètres
-                    </Button>
-                  </NextLink>
-                </NavbarMenuItem>
+            <NavbarMenuItem>
+              <NextLink
+                href="/statistiques"
+                className="w-full"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Button variant="flat" className="w-full justify-start">
+                  Statistiques
+                </Button>
+              </NextLink>
+            </NavbarMenuItem>
+            <NavbarMenuItem>
+              <NextLink
+                href="/parametres"
+                className="w-full"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Button variant="flat" className="w-full justify-start">
+                  Paramètres
+                </Button>
+              </NextLink>
+            </NavbarMenuItem>
               </>
             )}
             <NavbarMenuItem>

@@ -65,18 +65,34 @@ export default function ParametresPage() {
         <Tabs 
           aria-label="Options de paramètres" 
           className="w-full"
+          variant="underlined"
           classNames={{
-            tabList: "gap-2 sm:gap-4 w-full relative rounded-lg p-0 bg-default-100/50",
-            cursor: "w-full bg-background shadow-lg",
-            tab: "max-w-fit px-3 sm:px-6 h-10 sm:h-12",
-            tabContent: "group-data-[selected=true]:text-primary text-sm sm:text-base font-medium"
+            base: "w-full",
+            tabList: "gap-0 sm:gap-2 w-full relative rounded-none p-0 border-b border-divider bg-transparent",
+            cursor: "bg-primary h-0.5",
+            tab: "max-w-fit px-4 sm:px-8 h-12 sm:h-14 data-[selected=true]:text-primary",
+            tabContent: "group-data-[selected=true]:text-primary text-sm sm:text-base font-semibold transition-colors",
+            panel: "mt-6 sm:mt-8"
           }}
         >
           <Tab 
             key="calendars" 
             title={
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline">📅</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  strokeWidth={2} 
+                  stroke="currentColor" 
+                  className="w-5 h-5 sm:w-6 sm:h-6"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" 
+                  />
+                </svg>
                 <span>Calendriers</span>
               </div>
             }
@@ -89,8 +105,21 @@ export default function ParametresPage() {
           <Tab 
             key="annonces" 
             title={
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline">🏠</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  strokeWidth={2} 
+                  stroke="currentColor" 
+                  className="w-5 h-5 sm:w-6 sm:h-6"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" 
+                  />
+                </svg>
                 <span>Annonces</span>
               </div>
             }
@@ -103,8 +132,21 @@ export default function ParametresPage() {
           <Tab 
             key="jobs" 
             title={
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline">⚙️</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  strokeWidth={2} 
+                  stroke="currentColor" 
+                  className="w-5 h-5 sm:w-6 sm:h-6"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655-5.653a2.548 2.548 0 010-3.586L11.42 15.17z" 
+                  />
+                </svg>
                 <span>Jobs</span>
               </div>
             }

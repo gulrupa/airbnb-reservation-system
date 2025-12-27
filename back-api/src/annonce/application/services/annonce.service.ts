@@ -143,11 +143,11 @@ export class AnnonceService {
       }
     }
 
-    // Récupérer toutes les réservations pour ces calendriers
+    // Récupérer toutes les réservations futures pour ces calendriers
     const allReservations: ReservationDocument[] = [];
     for (const calendarUrlId of calendarUrlIds) {
       const reservations =
-        await this.reservationService.getReservationsByCalendarUrlId(calendarUrlId);
+        await this.reservationService.getFutureReservationsByCalendarUrlId(calendarUrlId);
       allReservations.push(...reservations);
     }
 

@@ -85,6 +85,7 @@ export function JobsSection() {
               </div>
               <Button
                 color="primary"
+                variant="flat"
                 onPress={() =>
                   handleJob(
                     'calendarSync',
@@ -94,15 +95,27 @@ export function JobsSection() {
                 }
                 isDisabled={loading.calendarSync}
                 isLoading={loading.calendarSync}
+                size="sm"
+                startContent={
+                  !loading.calendarSync && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-5 h-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"
+                      />
+                    </svg>
+                  )
+                }
               >
-                {loading.calendarSync ? (
-                  <>
-                    <Spinner size="sm" className="mr-2" />
-                    En cours...
-                  </>
-                ) : (
-                  'Lancer'
-                )}
+                {loading.calendarSync ? 'En cours...' : 'Lancer'}
               </Button>
             </div>
           </div>
@@ -118,6 +131,7 @@ export function JobsSection() {
               </div>
               <Button
                 color="primary"
+                variant="flat"
                 onPress={() =>
                   handleJob(
                     'emailSync',
@@ -127,15 +141,27 @@ export function JobsSection() {
                 }
                 isDisabled={loading.emailSync}
                 isLoading={loading.emailSync}
+                size="sm"
+                startContent={
+                  !loading.emailSync && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-5 h-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"
+                      />
+                    </svg>
+                  )
+                }
               >
-                {loading.emailSync ? (
-                  <>
-                    <Spinner size="sm" className="mr-2" />
-                    En cours...
-                  </>
-                ) : (
-                  'Lancer'
-                )}
+                {loading.emailSync ? 'En cours...' : 'Lancer'}
               </Button>
             </div>
           </div>
@@ -151,6 +177,7 @@ export function JobsSection() {
               </div>
               <Button
                 color="primary"
+                variant="flat"
                 onPress={() =>
                   handleJob(
                     'eventProcessor',
@@ -160,15 +187,27 @@ export function JobsSection() {
                 }
                 isDisabled={loading.eventProcessor}
                 isLoading={loading.eventProcessor}
+                size="sm"
+                startContent={
+                  !loading.eventProcessor && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-5 h-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"
+                      />
+                    </svg>
+                  )
+                }
               >
-                {loading.eventProcessor ? (
-                  <>
-                    <Spinner size="sm" className="mr-2" />
-                    En cours...
-                  </>
-                ) : (
-                  'Lancer'
-                )}
+                {loading.eventProcessor ? 'En cours...' : 'Lancer'}
               </Button>
             </div>
           </div>
@@ -184,6 +223,7 @@ export function JobsSection() {
               </div>
               <Button
                 color="primary"
+                variant="flat"
                 onPress={() =>
                   handleJob(
                     'statistiques',
@@ -193,15 +233,27 @@ export function JobsSection() {
                 }
                 isDisabled={loading.statistiques}
                 isLoading={loading.statistiques}
+                size="sm"
+                startContent={
+                  !loading.statistiques && (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-5 h-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"
+                      />
+                    </svg>
+                  )
+                }
               >
-                {loading.statistiques ? (
-                  <>
-                    <Spinner size="sm" className="mr-2" />
-                    En cours...
-                  </>
-                ) : (
-                  'Lancer'
-                )}
+                {loading.statistiques ? 'En cours...' : 'Lancer'}
               </Button>
             </div>
           </div>
